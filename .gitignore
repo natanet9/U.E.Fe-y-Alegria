@@ -33,55 +33,17 @@ Thumbs.db
 # ========================
 # VS Code
 # ========================
-.vscode/# ========================
-# Python / Django
-# ========================
-venv/
-__pycache__/
-*.pyc
-db.sqlite3
-.env
-
-# ========================
-# Django static/media
-# ========================
-staticfiles/
-media/
-
-# ========================
-# Node / React
-# ========================
-node_modules/
-build/
-
-# ========================
-# Logs
-# ========================
-*.log
-
-# ========================
-# OS
-# ========================
-.DS_Store
-Thumbs.db
-
-# ========================
-# VS Code
-# ========================
 .vscode/
 
 # ========================
-# tests
+# Tests
 # ========================
 .pytest_cache/
-__pycache__/
-*.pyc
 htmlcov/
 .coverage
 coverage.xml
 report.xml
 *.json
-*.txt
 
 # ========================
 # Temporary files
@@ -93,3 +55,9 @@ fix_*.py
 test_*.py
 tmp_*.py
 *.csv
+
+# ========================
+# Text files (requirements.txt always included)
+# ========================
+*.txt
+!requirements.txt
