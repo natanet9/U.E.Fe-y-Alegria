@@ -1,4 +1,4 @@
-# 🚀 Proyecto U.E. PANAMA
+# 🚀 Proyecto U.E. Fe y Alegria
 
 ## 📌 Descripción
 
