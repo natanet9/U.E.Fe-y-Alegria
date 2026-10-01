@@ -9,7 +9,7 @@ function LoginPage() {
         <section className="flex flex-col gap-4 justify-center">
           <LoginForm />
           <p className="text-center text-sm font-medium text-black/50 tracking-wide">
-            Copyright 2026 U.E.Panama. Todos los derechos reservados.
+            Copyright 2026 Fe y Alegria. Todos los derechos reservados.
           </p>
         </section>
       </div>

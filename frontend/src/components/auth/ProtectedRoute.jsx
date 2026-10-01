@@ -5,6 +5,7 @@ import { getStoredUser, getCurrentUser, isAuthenticated } from "../../services/a
 function ProtectedRoute({ children, allowedRoles = [] }) {
   const [checking, setChecking] = useState(true);
   const [valid, setValid] = useState(false);
+  const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -17,10 +18,11 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
       }
 
       try {
-        const usuario = await getCurrentUser();
+        const actual = await getCurrentUser();
         if (!cancelled) {
           // Update stored user data in case it changed
-          localStorage.setItem("auth_user", JSON.stringify(usuario));
+          localStorage.setItem("auth_user", JSON.stringify(actual));
+          setUsuario(actual);
           setValid(true);
           setChecking(false);
         }
@@ -28,6 +30,7 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
         if (!cancelled) {
           // Cookie expired or invalid – clean up
           localStorage.removeItem("auth_user");
+          setUsuario(null);
           setValid(false);
           setChecking(false);
         }
@@ -53,10 +56,16 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
     return <Navigate to="/login" replace />;
   }
 
+  const actual = usuario || getStoredUser();
+
+  // Contraseña temporal: el backend bloquea el resto de la API, aquí se fuerza el cambio
+  if (actual?.debe_cambiar_password) {
+    return <Navigate to="/cambiar-password-obligatorio" replace />;
+  }
+
   if (allowedRoles.length) {
-    const usuario = getStoredUser();
     const userRoles = new Set(
-      [usuario?.cargo, usuario?.rol, ...(Array.isArray(usuario?.roles) ? usuario.roles : [])]
+      [actual?.cargo, actual?.rol, ...(Array.isArray(actual?.roles) ? actual.roles : [])]
         .filter(Boolean)
         .map((role) => `${role}`.toLowerCase()),
     );

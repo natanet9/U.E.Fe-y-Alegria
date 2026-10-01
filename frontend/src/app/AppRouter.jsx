@@ -19,6 +19,9 @@ import ReportCardPage from "../pages/reportes/ReportCardPage";
 import UsuariosPage from "../pages/usuarios/UsuariosPage";
 import DimensionesPage from "../pages/dimensiones/DimensionesPage";
 import PanelAcademicoLayout from "../layouts/PanelAcademicoLayout";
+import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
+import ForcePasswordChangePage from "../pages/auth/ForcePasswordChangePage";
+import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
 
 function AppRouter() {
   return (
@@ -26,6 +29,8 @@ function AppRouter() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/recuperar-contrasena" element={<ForgotPasswordPage />} />
+        <Route path="/cambiar-password-obligatorio" element={<ForcePasswordChangePage />} />
         <Route
           element={(
             <ProtectedRoute>
@@ -61,6 +66,11 @@ function AppRouter() {
           <Route path="/perfil" element={(
             <ProtectedRoute allowedRoles={["director", "secretaria", "regente", "docente", "estudiante", "tutor"]}>
               <ProfilePage />
+            </ProtectedRoute>
+          )} />
+          <Route path="/cambiar-contrasena" element={(
+            <ProtectedRoute>
+              <ChangePasswordPage />
             </ProtectedRoute>
           )} />
           <Route path="/inscripcion" element={(

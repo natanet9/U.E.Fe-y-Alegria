@@ -77,6 +77,17 @@ class AuthMiddleware:
         "/api/login/",
         "/api/auth/forgot-password/",
         "/api/auth/reset-password/",
+        "/api/auth/verify-otp/",
+        "/api/auth/verify-reset-code/",
+        "/api/auth/2fa/reenviar/",
+    }
+
+    # Rutas permitidas mientras el usuario tiene una contrasena temporal pendiente
+    PASSWORD_CHANGE_ALLOWED_PATHS = {
+        "/api/auth/me/",
+        "/api/auth/change-password/",
+        "/api/auth/logout/",
+        "/api/auth/refresh/",
     }
 
     def __init__(self, get_response):
@@ -121,6 +132,17 @@ class AuthMiddleware:
             return JsonResponse({"error": "Usuario inactivo"}, status=403)
 
         request.usuario = usuario
+
+        # Contrasena temporal: solo se permite cambiarla, ver el perfil y salir
+        if getattr(usuario, "debe_cambiar_password", False) and request.path not in self.PASSWORD_CHANGE_ALLOWED_PATHS:
+            return JsonResponse(
+                {
+                    "error": "Debes cambiar tu contrasena temporal antes de continuar",
+                    "code": "PASSWORD_CHANGE_REQUIRED",
+                    "debe_cambiar_password": True,
+                },
+                status=403,
+            )
 
         if connection.vendor == 'postgresql':
             with connection.cursor() as cursor:

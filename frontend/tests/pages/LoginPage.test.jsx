@@ -11,8 +11,8 @@ describe("LoginPage", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText(/sistema academico/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /fe y alegria/i })).toBeInTheDocument();
     expect(screen.getByText(/bienvenido/i)).toBeInTheDocument();
-    expect(screen.getByText(/copyright 2026 u.e.panama/i)).toBeInTheDocument();
+    expect(screen.getByText(/copyright 2026 fe y alegria/i)).toBeInTheDocument();
   });
 });

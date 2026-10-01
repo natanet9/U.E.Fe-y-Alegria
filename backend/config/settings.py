@@ -72,8 +72,8 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'U.E. Panama API',
-    'DESCRIPTION': 'Documentacion OpenAPI del backend de U.E. Panama',
+    'TITLE': 'Fe y Alegria API',
+    'DESCRIPTION': 'Documentacion OpenAPI del backend de Fe y Alegria',
     'VERSION': '1.0.0',
 }
 
@@ -108,6 +108,32 @@ CORS_ALLOW_HEADERS = [
 API_DOCS_PUBLIC = DEBUG or os.environ.get('API_DOCS_PUBLIC', '').lower() == 'true'
 AUTH_TOKEN_MAX_AGE = int(os.environ.get('AUTH_TOKEN_MAX_AGE', 60 * 60 * 24))
 AUTH_TOKEN_SALT = os.environ.get('AUTH_TOKEN_SALT', 'ue.panama.auth')
+
+# ── Correo saliente (SMTP) ───────────────────────────────────────────────────
+# Para Gmail usa una "contrasena de aplicacion" en EMAIL_HOST_PASSWORD.
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('1', 'true', 'yes')
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() in ('1', 'true', 'yes')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', 20))
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL') or EMAIL_HOST_USER or 'no-reply@localhost'
+EMAIL_SUBJECT_PREFIX = os.environ.get('EMAIL_SUBJECT_PREFIX', '[U.E. Fe y Alegria] ')
+
+# ─ Autenticacion en dos pasos (2FA / OTP) ───────────────────────────────────
+OTP_ISSUER = os.environ.get('OTP_ISSUER', 'U.E. Fe y Alegria')
+OTP_TTL_MINUTOS = int(os.environ.get('OTP_TTL_MINUTOS', 10))
+OTP_LOGIN_TTL_MINUTOS = int(os.environ.get('OTP_LOGIN_TTL_MINUTOS', 5))
+OTP_MAX_INTENTOS = int(os.environ.get('OTP_MAX_INTENTOS', 5))
+OTP_CODIGO_DIGITOS = int(os.environ.get('OTP_CODIGO_DIGITOS', 6))
+OTP_2FA_POR_DEFECTO = os.environ.get('OTP_2FA_POR_DEFECTO', 'True').lower() in ('1', 'true', 'yes')
+OTP_TOTP_INTERVALO = int(os.environ.get('OTP_TOTP_INTERVALO', 30))
+OTP_TOTP_VENTANA = int(os.environ.get('OTP_TOTP_VENTANA', 1))
+OTP_PENDING_TOKEN_MAX_AGE = int(os.environ.get('OTP_PENDING_TOKEN_MAX_AGE', 60 * 10))
+AUTH_TEMP_PASSWORD_MAX_AGE = int(os.environ.get('AUTH_TEMP_PASSWORD_MAX_AGE', 60 * 60 * 24 * 3))
+FRONTEND_BASE_URL = os.environ.get('FRONTEND_BASE_URL', 'http://localhost:3000')
 
 # Auth cookie settings
 AUTH_COOKIE_NAME = os.environ.get('AUTH_COOKIE_NAME', 'auth_token')

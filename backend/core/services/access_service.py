@@ -18,7 +18,8 @@ class AccessControlService:
     def get_role_name(self, usuario):
         if usuario is None:
             return None
-        return usuario.rol.nombre if usuario.rol else None
+        rol = getattr(usuario, 'rol', None)
+        return getattr(rol, 'nombre', None)
 
     def es_director(self, usuario):
         return self.get_role_name(usuario) == self.ROL_DIRECTOR
@@ -142,15 +143,32 @@ class AccessControlService:
             .distinct()
         )
 
+    def get_tutor(self, usuario):
+        """Devuelve el registro Tutores vinculado a la cuenta del usuario.
+
+        Se prioriza la relacion directa `Tutores.usuario`; si la cuenta es
+        antigua y solo comparte el CI se busca por ese campo.
+        """
+        from ..models import Tutores
+
+        try:
+            tutor = getattr(usuario, 'tutor', None)
+        except Exception:
+            tutor = None
+        if tutor is not None:
+            return tutor
+
+        ci = getattr(usuario, 'ci', None)
+        if not ci:
+            return None
+        return Tutores.objects.filter(ci=ci, activo=True).first()
+
     def get_estudiantes_ids_tutor(self, usuario):
         """Obtiene IDs de estudiantes que son hijos del tutor."""
-        # Primero buscamos si el usuario tiene un registro en Tutores
-        from ..models import Tutores
-        try:
-            tutor = Tutores.objects.get(ci=usuario.ci, activo=True)
-        except Tutores.DoesNotExist:
+        tutor = self.get_tutor(usuario)
+        if tutor is None:
             return []
-        
+
         return list(
             EstudianteTutor.objects
             .filter(tutor=tutor, activo=True)

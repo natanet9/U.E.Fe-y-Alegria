@@ -1,4 +1,20 @@
+import unicodedata
+
 from django.db import models
+
+
+def iniciales_usuario(nombres='', primer_apellido='', segundo_apellido=''):
+    """Iniciales normalizadas (sin acentos ni simbolos) para el nombre de usuario.
+
+    'Juan Perez Gomez' -> 'jpg'. Si no hay letras devuelve 'usr'.
+    """
+    letras = []
+    for parte in (nombres or '', primer_apellido or '', segundo_apellido or ''):
+        for caracter in unicodedata.normalize('NFKD', str(parte)):
+            if caracter.isalpha() and caracter.isascii():
+                letras.append(caracter.lower())
+                break
+    return ''.join(letras) or 'usr'
 
 
 class Roles(models.Model):
@@ -15,15 +31,33 @@ class Roles(models.Model):
 
 
 class Usuarios(models.Model):
+    OTP_METODO_CHOICES = [
+        ('email', 'Codigo por correo electronico'),
+        ('totp', 'Aplicacion autenticadora (TOTP)'),
+    ]
     ci = models.TextField(unique=True, blank=True, null=True)
     nombre = models.TextField(blank=True, null=True)
     primer_apellido = models.TextField(blank=True, null=True)
     segundo_apellido = models.TextField(blank=True, null=True)
     email = models.TextField(unique=True)
+    usuario = models.TextField(unique=True, blank=True, null=True)
+    correo_personal = models.TextField(unique=True, blank=True, null=True)
     password_hash = models.TextField()
     rol = models.ForeignKey(Roles, on_delete=models.CASCADE)
     activo = models.BooleanField(default=True)
     last_login = models.DateTimeField(blank=True, null=True)
+    # ─ Ciclo de vida de la contrasena ───────────────────────────────────────
+    # password_temporal=True -> la contrasena actual fue generada por el sistema
+    # debe_cambiar_password=True -> el usuario esta obligado a cambiarla al entrar
+    password_temporal = models.BooleanField(default=False)
+    debe_cambiar_password = models.BooleanField(default=False)
+    password_cambiada_en = models.DateTimeField(blank=True, null=True)
+    # ── Autenticacion en dos pasos (2FA / OTP) ────────────────────────────────
+    otp_habilitado = models.BooleanField(default=False)
+    otp_metodo = models.TextField(choices=OTP_METODO_CHOICES, default='email')
+    otp_secret = models.TextField(blank=True, null=True)
+    otp_configurado_en = models.DateTimeField(blank=True, null=True)
+    intentos_otp_fallidos = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -32,12 +66,99 @@ class Usuarios(models.Model):
         db_table = 'usuarios'
 
     @property
+    def correo_notificaciones(self):
+        """Correo al que se envian OTP, recuperacion y credenciales (personal primero)."""
+        return (self.correo_personal or self.email or '').strip()
+
+    @classmethod
+    def generar_usuario_unico(cls, nombres='', primer_apellido='', segundo_apellido='', excluir_id=None):
+        """Nombre de usuario unico con el patron iniciales + numero (jpg1, jpg2...)."""
+        base = iniciales_usuario(nombres, primer_apellido, segundo_apellido)
+        correlativo = 1
+        while True:
+            candidato = f'{base}{correlativo}'
+            existentes = cls.objects.filter(usuario=candidato)
+            if excluir_id:
+                existentes = existentes.exclude(id=excluir_id)
+            if not existentes.exists():
+                return candidato
+            correlativo += 1
+
+    def completar_datos_acceso(self):
+        """Rellena el usuario y el correo personal cuando no fueron enviados.
+
+        Devuelve la lista de campos completados (para conservarlos si el guardado
+        usa `update_fields`).
+        """
+        completados = []
+        if not (self.usuario or '').strip():
+            self.usuario = self.generar_usuario_unico(
+                self.nombre, self.primer_apellido, self.segundo_apellido, excluir_id=self.pk,
+            )
+            completados.append('usuario')
+        if not (self.correo_personal or '').strip():
+            self.correo_personal = (self.email or '').strip().lower() or None
+            if self.correo_personal:
+                completados.append('correo_personal')
+        return completados
+
+    def save(self, *args, **kwargs):
+        completados = self.completar_datos_acceso()
+        update_fields = kwargs.get('update_fields')
+        if completados and update_fields is not None:
+            kwargs['update_fields'] = list(dict.fromkeys([*update_fields, *completados]))
+        super().save(*args, **kwargs)
+
+    @property
     def nombre_completo(self):
         parts = [self.nombre or '', self.primer_apellido or '', self.segundo_apellido or '']
         return ' '.join(p for p in parts if p).strip() or self.email
 
     def __str__(self):
         return self.nombre_completo
+
+
+class CodigoVerificacion(models.Model):
+    """Codigos OTP de un solo uso (login 2FA, recuperacion, activacion 2FA)."""
+    PROPOSITO_CHOICES = [
+        ('login', 'Inicio de sesion (2FA)'),
+        ('recuperacion', 'Recuperacion de contrasena'),
+        ('activar_otp', 'Activar segundo factor'),
+        ('desactivar_otp', 'Desactivar segundo factor'),
+        ('credenciales', 'Entrega de credenciales'),
+    ]
+    METODO_CHOICES = [
+        ('email', 'Correo electronico'),
+        ('totp', 'Aplicacion autenticadora'),
+    ]
+    usuario = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name='codigos_verificacion')
+    proposito = models.TextField(choices=PROPOSITO_CHOICES)
+    metodo = models.TextField(choices=METODO_CHOICES, default='email')
+    codigo_hash = models.TextField()
+    enviado_a = models.TextField(blank=True, null=True)
+    expira_en = models.DateTimeField()
+    usado = models.BooleanField(default=False)
+    usado_en = models.DateTimeField(blank=True, null=True)
+    intentos = models.IntegerField(default=0)
+    ip_address = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = True
+        db_table = 'codigos_verificacion'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['usuario', 'proposito'], name='idx_codigo_usuario_prop'),
+            models.Index(fields=['expira_en'], name='idx_codigo_expira'),
+        ]
+
+    @property
+    def vigente(self):
+        from django.utils import timezone
+        return (not self.usado) and self.expira_en >= timezone.now()
+
+    def __str__(self):
+        return f'{self.get_proposito_display()} - {self.usuario_id} - {"usado" if self.usado else "vigente"}'
 
 
 class Docentes(models.Model):
@@ -185,6 +306,8 @@ class DimensionConfigPeriodo(models.Model):
 
 
 class Tutores(models.Model):
+    # Cuenta de acceso del tutor. Se crea con contrasena temporal y cambio obligatorio.
+    usuario = models.OneToOneField(Usuarios, on_delete=models.SET_NULL, blank=True, null=True, related_name='tutor')
     ci = models.TextField(unique=True)
     tipo_documento = models.TextField(default='CI')
     primer_apellido = models.TextField()
@@ -192,15 +315,36 @@ class Tutores(models.Model):
     nombres = models.TextField()
     parentesco = models.TextField(blank=True, null=True)
     celular = models.TextField(blank=True, null=True)
+
     idioma_frecuente = models.TextField(blank=True, null=True)
     fecha_nacimiento = models.DateField(blank=True, null=True)
     activo = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         managed = True
         db_table = 'tutores'
+
+    @property
+    def nombre_completo(self):
+        parts = [self.nombres or '', self.primer_apellido or '', self.segundo_apellido or '']
+        return ' '.join(p for p in parts if p).strip()
+
+    @property
+    def tiene_usuario(self):
+        return self.usuario_id is not None
+
+    @property
+    def estudiantes_ids(self):
+        """IDs de los estudiantes que tiene asignados este tutor."""
+        try:
+            return list(
+                self.estudiantetutor_set.filter(activo=True).values_list('estudiante_id', flat=True)
+            )
+        except Exception:
+            return []
 
     def __str__(self):
         return f'{self.nombres} {self.primer_apellido}'
@@ -229,7 +373,6 @@ class Estudiantes(models.Model):
     tipo_discapacidad = models.TextField(blank=True, null=True)
     tiene_tea = models.BooleanField(default=False)
     dificultad_aprendizaje = models.TextField(blank=True, null=True)
-    usuario = models.ForeignKey(Usuarios, on_delete=models.SET_NULL, blank=True, null=True, related_name='estudiante_usuario')
     estado = models.TextField(choices=ESTADO_CHOICES, default='activo')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -237,6 +380,35 @@ class Estudiantes(models.Model):
     class Meta:
         managed = True
         db_table = 'estudiantes'
+
+    @property
+    def tiene_tutor(self):
+        """Indica si el estudiante ya tiene al menos un tutor asignado."""
+        try:
+            return self.estudiantetutor_set.filter(activo=True).exists()
+        except Exception:
+            return False
+
+    @property
+    def tutor_principal(self):
+        """Tutor principal del estudiante (o el primero activo si no hay principal)."""
+        try:
+            relacion = (
+                self.estudiantetutor_set
+                .filter(activo=True, es_principal=True)
+                .select_related('tutor')
+                .first()
+            )
+            if relacion is None:
+                relacion = (
+                    self.estudiantetutor_set
+                    .filter(activo=True)
+                    .select_related('tutor')
+                    .first()
+                )
+        except Exception:
+            return None
+        return relacion.tutor if relacion else None
 
     def __str__(self):
         return f'{self.nombres} {self.primer_apellido}'
@@ -309,6 +481,8 @@ class Actividades(models.Model):
     descripcion = models.TextField(blank=True, null=True)
     puntaje_maximo = models.DecimalField(max_digits=5, decimal_places=2)
     fecha_actividad = models.DateField()
+    # Usuario que registro la actividad (auditoria de notas)
+    creado_por = models.ForeignKey(Usuarios, on_delete=models.SET_NULL, blank=True, null=True, related_name='actividades_creadas')
     created_at = models.DateTimeField(auto_now_add=True)
     activo = models.BooleanField(default=True)
 
@@ -324,6 +498,9 @@ class ActividadNotas(models.Model):
     actividad = models.ForeignKey(Actividades, on_delete=models.CASCADE)
     estudiante = models.ForeignKey(Estudiantes, on_delete=models.CASCADE)
     valor = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    # Usuario que capturo el ultimo cambio de la nota y justificacion opcional
+    registrado_por = models.ForeignKey(Usuarios, on_delete=models.SET_NULL, blank=True, null=True, related_name='notas_registradas')
+    motivo_modificacion = models.TextField(blank=True, null=True)
     registrado_en = models.DateTimeField(auto_now_add=True)
     modificado_en = models.DateTimeField(auto_now=True)
     activo = models.BooleanField(default=True)
@@ -349,6 +526,7 @@ class NotaObservaciones(models.Model):
     periodo = models.ForeignKey(Periodos, on_delete=models.CASCADE)
     indicador = models.TextField(choices=INDICADOR_CHOICES, blank=True, null=True)
     observacion = models.TextField(blank=True, null=True)
+    registrado_por = models.ForeignKey(Usuarios, on_delete=models.SET_NULL, blank=True, null=True, related_name='observaciones_registradas')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -403,24 +581,47 @@ class Licencias(models.Model):
         ('aprobada', 'Aprobada'),
         ('rechazada', 'Rechazada'),
     ]
+    TIPO_CHOICES = [
+        ('enfermedad', 'Enfermedad'),
+        ('personal', 'Motivo personal'),
+        ('viaje', 'Viaje'),
+        ('duelo', 'Duelo'),
+        ('institucional', 'Actividad institucional'),
+        ('otro', 'Otro'),
+    ]
     estudiante = models.ForeignKey(Estudiantes, on_delete=models.CASCADE)
     tutor_solicitante = models.ForeignKey(Tutores, on_delete=models.SET_NULL, blank=True, null=True)
     regente = models.ForeignKey(Usuarios, on_delete=models.SET_NULL, blank=True, null=True, related_name='licencias_regentadas')
+    tipo = models.TextField(choices=TIPO_CHOICES, default='enfermedad')
     motivo = models.TextField()
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     requiere_respaldo = models.BooleanField(default=False)
     respaldo_presentado = models.BooleanField(default=False)
+    # URL o descripcion del respaldo fisico/digital presentado
+    adjunto_url = models.TextField(blank=True, null=True)
     estado = models.TextField(choices=ESTADO_CHOICES, default='pendiente')
     activo = models.BooleanField(default=True)
     aprobado_por = models.ForeignKey(Usuarios, on_delete=models.SET_NULL, blank=True, null=True, related_name='licencias_aprobadas')
     aprobado_en = models.DateTimeField(blank=True, null=True)
     observaciones = models.TextField(blank=True, null=True)
+    # Usuario que registro la solicitud de licencia
+    creado_por = models.ForeignKey(Usuarios, on_delete=models.SET_NULL, blank=True, null=True, related_name='licencias_creadas')
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         managed = True
         db_table = 'licencias'
+        indexes = [
+            models.Index(fields=['estudiante', 'estado'], name='idx_licencia_estado'),
+        ]
+
+    @property
+    def dias(self):
+        if self.fecha_inicio and self.fecha_fin:
+            return (self.fecha_fin - self.fecha_inicio).days + 1
+        return 0
 
     def __str__(self):
         return f'Licencia {self.estudiante} ({self.fecha_inicio} - {self.fecha_fin})'

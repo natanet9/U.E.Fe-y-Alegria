@@ -32,6 +32,7 @@ from .services.tutores_service import TutoresService
 from .services.estudiante_tutor_service import EstudianteTutorService
 from .services.config_service import ConfigService
 from .services.notification_service import NotificationService
+from .services.otp_service import OTPError, OTPService
 
 from .models import DimensionConfigPeriodo, Notificacion
 from .rate_limit import rate_limiter
@@ -54,6 +55,16 @@ _rcs_placeholder_generar = _ReportCardServicePlaceholder.generar_boletin
 
 def _get_usuario(request):
     return getattr(request, "usuario", None)
+
+
+def _identificador_acceso(request):
+    """Identificador enviado por el cliente: usuario, correo institucional o personal."""
+    data = request.data
+    for clave in ('email', 'usuario', 'correo_personal', 'identificador'):
+        valor = data.get(clave)
+        if valor:
+            return str(valor).strip()
+    return ""
 
 
 def _query_int(request, name, default=None):
@@ -120,7 +131,7 @@ def health_view(request):
 @api_view(["POST"])
 @trace_view_function
 def login_view(request):
-    email = request.data.get("email", "").strip().lower()
+    email = _identificador_acceso(request)
     password = request.data.get("password")
 
     if not email or not password:
@@ -137,9 +148,13 @@ def login_view(request):
             "remaining_attempts": remaining,
         }, status=429)
 
-    data, error = AuthService().login(email, password)
+    data, error = AuthService().login(email, password, ip=ip)
     if error:
         return Response({"error": error}, status=401)
+
+    # Segundo factor pendiente: se devuelve el desafio, aun no hay sesion
+    if data.get("requires_otp"):
+        return Response(data, status=200)
 
     response = Response({"mensaje": "Login exitoso", **data}, status=200)
     response.set_cookie(
@@ -151,6 +166,50 @@ def login_view(request):
         samesite=getattr(settings, "AUTH_COOKIE_SAMESITE", "Lax"),
     )
     return response
+
+
+@api_view(["POST"])
+@trace_view_function
+def verify_otp_view(request):
+    """Paso 2 del login: valida el codigo OTP y entrega el token definitivo."""
+    otp_token = request.data.get("otp_token")
+    codigo = (request.data.get("codigo") or request.data.get("codigo_otp")
+              or request.data.get("code") or "").strip()
+
+    ip = request.META.get('REMOTE_ADDR', 'unknown')
+    if not rate_limiter.is_allowed(f"otp:{ip}", max_attempts=15, window_seconds=60):
+        return Response({"error": "Demasiados intentos. Intenta de nuevo en 1 minuto."}, status=429)
+
+    data, error = AuthService().verify_otp(otp_token, codigo)
+    if error:
+        return Response({"error": error}, status=401 if "Token" in error else 400)
+
+    response = Response({"mensaje": "Verificacion exitosa", **data}, status=200)
+    response.set_cookie(
+        getattr(settings, "AUTH_COOKIE_NAME", "auth_token"),
+        data["token"],
+        max_age=getattr(settings, "AUTH_TOKEN_MAX_AGE", 60 * 60 * 24),
+        httponly=getattr(settings, "AUTH_COOKIE_HTTPONLY", True),
+        secure=getattr(settings, "AUTH_COOKIE_SECURE", False),
+        samesite=getattr(settings, "AUTH_COOKIE_SAMESITE", "Lax"),
+    )
+    return response
+
+
+@api_view(["POST"])
+@trace_view_function
+def resend_otp_view(request):
+    """Reenvia el codigo de verificacion del login en dos pasos."""
+    otp_token = request.data.get("otp_token")
+    ip = request.META.get('REMOTE_ADDR', 'unknown')
+
+    if not rate_limiter.is_allowed(f"otp-resend:{ip}", max_attempts=5, window_seconds=300):
+        return Response({"error": "Demasiados reenvios. Espera unos minutos."}, status=429)
+
+    data, error = AuthService().reenviar_codigo_otp(otp_token, ip=ip)
+    if error:
+        return Response({"error": error}, status=400)
+    return Response(data, status=200)
 
 
 @api_view(["GET", "PUT"])
@@ -240,33 +299,150 @@ def change_password_view(request):
 @api_view(["POST"])
 @trace_view_function
 def forgot_password_view(request):
-    email = request.data.get("email", "").strip().lower()
+    email = _identificador_acceso(request)
     if not email:
         return Response({"error": "Debe enviar email"}, status=400)
 
-    token = AuthService().solicitar_reset(email)
-    if token:
-        return Response({"mensaje": "Si el email existe, recibiras un enlace de recuperacion", "reset_token": token}, status=200)
-    return Response({"mensaje": "Si el email existe, recibiras un enlace de recuperacion"}, status=200)
+    ip = request.META.get('REMOTE_ADDR', 'unknown')
+    if not rate_limiter.is_allowed(f"forgot:{ip}", max_attempts=10, window_seconds=600):
+        return Response({"error": "Demasiadas solicitudes. Intenta mas tarde."}, status=429)
+
+    auth = AuthService()
+    # Enlace legacy (token firmado) y codigo de verificacion por correo
+    reset_token = auth.solicitar_reset(email)
+    envio = auth.solicitar_codigo_recuperacion(email, ip=ip)
+
+    payload = {"mensaje": "Si el email existe, recibiras un codigo de recuperacion en tu correo"}
+    if envio:
+        payload.update({
+            "codigo_enviado": bool(envio.get('enviado')),
+            "destinatario": envio.get('destinatario'),
+            "expira_en_minutos": envio.get('expira_en_minutos'),
+        })
+    else:
+        payload["codigo_enviado"] = False
+
+    # En desarrollo, si no se pudo enviar el correo, se devuelve el token para no bloquear pruebas
+    if (not envio or not envio.get('enviado')) and reset_token and settings.DEBUG:
+        payload["reset_token"] = reset_token
+        payload["aviso"] = "Correo no enviado (modo desarrollo): usa el reset_token para cambiar la contrasena"
+
+    return Response(payload, status=200)
+
+
+@api_view(["POST"])
+@trace_view_function
+def verify_reset_code_view(request):
+    """Valida el codigo de recuperacion y entrega un token temporal de cambio."""
+    email = _identificador_acceso(request)
+    codigo = (request.data.get("codigo") or request.data.get("codigo_otp") or "").strip()
+
+    if not email or not codigo:
+        return Response({"error": "Debe enviar email y codigo"}, status=400)
+
+    ip = request.META.get('REMOTE_ADDR', 'unknown')
+    if not rate_limiter.is_allowed(f"reset-code:{ip}", max_attempts=15, window_seconds=300):
+        return Response({"error": "Demasiados intentos. Espera unos minutos."}, status=429)
+
+    try:
+        data = AuthService().verificar_codigo_recuperacion(email, codigo)
+        return Response(data, status=200)
+    except ValueError as e:
+        return Response({"error": str(e)}, status=400)
 
 
 @api_view(["POST"])
 @trace_view_function
 def reset_password_view(request):
     token = request.data.get("token")
+    email = _identificador_acceso(request)
+    codigo = (request.data.get("codigo") or request.data.get("codigo_otp") or "").strip()
     new_password = request.data.get("new_password") or request.data.get("password")
 
-    if not token or not new_password:
-        return Response({"error": "Debe enviar token y new_password"}, status=400)
+    if not new_password:
+        return Response({"error": "Debe enviar new_password"}, status=400)
 
     if len(new_password) < 6:
         return Response({"error": "La contrasena debe tener al menos 6 caracteres"}, status=400)
 
     try:
-        result = AuthService().reset_password(token, new_password)
+        if token:
+            try:
+                result = AuthService().reset_password(token, new_password)
+            except ValueError as e:
+                if email and codigo:
+                    result = AuthService().reset_password_con_codigo(email, codigo, new_password)
+                else:
+                    raise e
+        elif email and codigo:
+            result = AuthService().reset_password_con_codigo(email, codigo, new_password)
+        else:
+            return Response({"error": "Debe enviar token o email + codigo"}, status=400)
         return Response(result, status=200)
     except ValueError as e:
         return Response({"error": str(e)}, status=400)
+
+
+# ── Autenticacion en dos pasos (2FA) ────────────────────────────────────────
+
+
+@api_view(["GET"])
+@trace_view_function
+def otp_status_view(request):
+    usuario = _get_usuario(request)
+    if not usuario:
+        return Response({"error": "No autorizado"}, status=401)
+    return Response(OTPService().estado(usuario), status=200)
+
+
+@api_view(["POST"])
+@trace_view_function
+def otp_setup_view(request):
+    """Inicia la configuracion del segundo factor (email o aplicacion TOTP)."""
+    usuario = _get_usuario(request)
+    if not usuario:
+        return Response({"error": "No autorizado"}, status=401)
+
+    metodo = request.data.get("metodo") or request.data.get("otp_metodo") or "email"
+    ip = request.META.get('REMOTE_ADDR', 'unknown')
+    try:
+        data = OTPService().iniciar_configuracion(usuario, metodo, ip=ip)
+        return Response(data, status=200)
+    except OTPError as e:
+        return Response({"error": str(e)}, status=400)
+    except ValueError as e:
+        return Response({"error": str(e)}, status=400)
+
+
+@api_view(["POST"])
+@trace_view_function
+def otp_enable_view(request):
+    """Confirma la activacion del segundo factor con un codigo valido."""
+    usuario = _get_usuario(request)
+    if not usuario:
+        return Response({"error": "No autorizado"}, status=401)
+
+    codigo = request.data.get("codigo") or request.data.get("codigo_otp")
+    data, error = OTPService().confirmar_configuracion(usuario, codigo)
+    if error:
+        return Response({"error": error}, status=400)
+    return Response({"mensaje": "Verificacion en dos pasos activada", **data}, status=200)
+
+
+@api_view(["POST"])
+@trace_view_function
+def otp_disable_view(request):
+    """Desactiva el segundo factor confirmando con contrasena o codigo."""
+    usuario = _get_usuario(request)
+    if not usuario:
+        return Response({"error": "No autorizado"}, status=401)
+
+    codigo = request.data.get("codigo") or request.data.get("codigo_otp")
+    password = request.data.get("password") or request.data.get("current_password")
+    data, error = OTPService().deshabilitar(usuario, codigo=codigo, password=password)
+    if error:
+        return Response({"error": error}, status=400)
+    return Response({"mensaje": "Verificacion en dos pasos desactivada", **data}, status=200)
 
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
@@ -814,6 +990,45 @@ def tutor_detail_view(request, tutor_id):
         return Response({"error": str(e)}, status=403)
     except Tutores.DoesNotExist:
         return Response({"error": "Tutor no encontrado"}, status=404)
+
+
+@api_view(["POST"])
+@trace_view_function
+def tutor_credenciales_view(request, tutor_id):
+    """Crea o regenera la cuenta de acceso del tutor y envia la contrasena temporal."""
+    usuario = _get_usuario(request)
+    if not usuario:
+        return Response({"error": "No autorizado"}, status=401)
+
+    email = request.data.get("email")
+    try:
+        data = TutoresService().generar_credenciales(usuario, tutor_id, email=email)
+        return Response(data, status=200)
+    except PermissionError as e:
+        return Response({"error": str(e)}, status=403)
+    except Tutores.DoesNotExist:
+        return Response({"error": "Tutor no encontrado"}, status=404)
+    except ValueError as e:
+        return Response({"error": str(e)}, status=400)
+
+
+@api_view(["DELETE"])
+@trace_view_function
+def tutor_usuario_delete_view(request, tutor_id):
+    """Desvincula la cuenta de acceso del tutor."""
+    usuario = _get_usuario(request)
+    if not usuario:
+        return Response({"error": "No autorizado"}, status=401)
+
+    try:
+        data = TutoresService().desvincular_usuario(usuario, tutor_id)
+        return Response(data, status=200)
+    except PermissionError as e:
+        return Response({"error": str(e)}, status=403)
+    except Tutores.DoesNotExist:
+        return Response({"error": "Tutor no encontrado"}, status=404)
+    except ValueError as e:
+        return Response({"error": str(e)}, status=400)
 
 
 @api_view(["GET"])

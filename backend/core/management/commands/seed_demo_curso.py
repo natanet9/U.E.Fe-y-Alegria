@@ -146,10 +146,10 @@ class Command(BaseCommand):
     def _seed_configuracion(self):
         ConfiguracionEscuela.objects.all().delete()
         ConfiguracionEscuela.objects.create(
-            nombre='Unidad Educativa Panama',
+            nombre='Fe y Alegria',
             direccion='Av. Principal #123',
             telefono='291-12345',
-            email='uepanama@educacion.bo',
+            email='feyalegria@educacion.bo',
             ciudad='El Alto',
             gestion_actual=2026,
             escala_aprobacion=51.00,

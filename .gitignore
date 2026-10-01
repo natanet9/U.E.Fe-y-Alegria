@@ -55,6 +55,10 @@ fix_*.py
 test_*.py
 tmp_*.py
 *.csv
+# El patron test_*.py de arriba es para scripts sueltos de depuracion.
+# Los tests del proyecto si se versionan:
+!backend/core/tests/**/test_*.py
+!backend/core/test_*.py
 
 # ========================
 # Text files (requirements.txt always included)

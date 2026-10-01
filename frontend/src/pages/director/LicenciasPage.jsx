@@ -59,7 +59,7 @@ function LicenciasPage() {
   return (
     <section className="space-y-6">
       <header className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,rgba(244,114,182,0.08),rgba(255,255,255,0.94),rgba(14,165,233,0.05))] p-8 shadow-[0_18px_70px_rgba(15,23,42,0.05)]">
-        <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">U.E.Panama</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">Fe y Alegria</p>
         <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">Licencias</h1>
         <p className="mt-2 max-w-2xl text-base text-slate-600">Revisa, aprueba o rechaza solicitudes desde un solo tablero.</p>
       </header>

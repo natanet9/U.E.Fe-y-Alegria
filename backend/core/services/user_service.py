@@ -6,6 +6,8 @@ from ..models import Docentes, Roles, Usuarios
 from ..tracing import trace_service_class
 from .access_service import AccessControlService
 from .audit_service import AuditService
+from .email_service import EmailService
+from .otp_service import OTPService
 from .validation import validar_required, validar_email, validar_ci, ValidationError
 
 
@@ -31,6 +33,8 @@ class UserService:
                 | Q(primer_apellido__icontains=query)
                 | Q(segundo_apellido__icontains=query)
                 | Q(email__icontains=query)
+                | Q(correo_personal__icontains=query)
+                | Q(usuario__icontains=query)
             )
 
         if rol:
@@ -69,6 +73,8 @@ class UserService:
             raise PermissionError('No tienes permisos para crear usuarios')
 
         email = data.get('email')
+        correo_personal = str(data.get('correo_personal') or data.get('email_personal') or '').strip().lower()
+        usuario_solicitado = str(data.get('usuario') or '').strip().lower()
         nombre = data.get('nombre') or ''
         apellido = data.get('apellido') or ''
         nombre_completo = data.get('nombre_completo', '').strip()
@@ -78,6 +84,17 @@ class UserService:
 
         validar_required(data, ['email', 'rol'])
         validar_email(data.get('email'))
+        # El correo personal es obligatorio: ahi se envian las credenciales,
+        # los codigos OTP y la recuperacion de contrasena.
+        if not correo_personal:
+            raise ValidationError('El correo personal es obligatorio')
+        validar_email(correo_personal, 'Correo personal')
+        if Usuarios.objects.filter(correo_personal__iexact=correo_personal).exists():
+            raise ValidationError('Ese correo personal ya esta registrado por otro usuario')
+        if Usuarios.objects.filter(email__iexact=str(email or '').strip()).exists():
+            raise ValidationError('Ese correo institucional ya esta registrado por otro usuario')
+        if usuario_solicitado and Usuarios.objects.filter(usuario__iexact=usuario_solicitado).exists():
+            raise ValidationError('Ese nombre de usuario ya esta registrado')
 
         if not nombre and not apellido and nombre_completo:
             parts = nombre_completo.split(maxsplit=1)
@@ -92,15 +109,43 @@ class UserService:
         if self._role_rank(rol_nombre) > self._role_rank(usuario.rol.nombre if usuario.rol else ''):
             raise PermissionError(f'No puedes crear un usuario con rol superior al tuyo')
 
+        # Contrasena temporal opcional: se genera, se marca el cambio obligatorio y se envia por correo
+        password_temporal = str(
+            data.get('password_temporal', data.get('generar_password_temporal', ''))
+        ).lower() in ('1', 'true', 'yes', 'si')
+        credenciales = None
+        if password_temporal and not data.get('password'):
+            password = OTPService().generar_password_temporal()
+
         usuario_obj = Usuarios.objects.create(
             ci=ci or None,
             nombre=nombre or None,
             primer_apellido=apellido or None,
             email=email,
+            correo_personal=correo_personal,
+            usuario=usuario_solicitado or None,
             password_hash=make_password(password),
             rol=rol,
             activo=True,
+            password_temporal=bool(password_temporal and not data.get('password')),
+            debe_cambiar_password=bool(password_temporal and not data.get('password')),
         )
+        if usuario_obj.password_temporal:
+            enviado = False
+            try:
+                enviado = EmailService().enviar_credenciales(usuario_obj, password, nombre=usuario_obj.nombre_completo)
+            except Exception:
+                enviado = False
+            credenciales = {'correo_enviado': enviado, 'password_temporal': None if enviado else password}
+            credenciales['usuario'] = usuario_obj.usuario
+            credenciales['correo_personal'] = usuario_obj.correo_personal
+            # El segundo factor queda activo desde el primer ingreso (OTP_2FA_POR_DEFECTO)
+            try:
+                OTPService().habilitar_inicial(usuario_obj, actor=usuario)
+            except Exception:
+                pass
+            credenciales['otp_habilitado'] = bool(getattr(usuario_obj, 'otp_habilitado', False))
+            credenciales['otp_metodo'] = getattr(usuario_obj, 'otp_metodo', 'email') or 'email'
         if rol_nombre == 'docente':
             docente_kwargs = {'usuario': usuario_obj}
             for f in ('titulo_academico', 'especialidad'):
@@ -111,8 +156,15 @@ class UserService:
             if 'anos_experiencia' in data:
                 docente_kwargs['anos_experiencia'] = data['anos_experiencia']
             Docentes.objects.create(**docente_kwargs)
-        self.audit.record_usuario_change(usuario, 'CREATE', usuario_obj.id, {'email': data.get('email')})
-        return self._to_dict(usuario_obj)
+        self.audit.record_usuario_change(usuario, 'CREATE', usuario_obj.id, {
+            'email': data.get('email'),
+            'correo_personal': usuario_obj.correo_personal,
+            'usuario': usuario_obj.usuario,
+        })
+        resultado = self._to_dict(usuario_obj)
+        if credenciales is not None:
+            resultado['credenciales'] = credenciales
+        return resultado
 
     def actualizar(self, usuario, usuario_id, data):
         if not self.ac.puede_gestionar_usuarios(usuario):
@@ -132,7 +184,25 @@ class UserService:
             validar_ci(data['ci'])
             u.ci = data['ci']
         if 'email' in data:
-            u.email = data['email']
+            validar_email(data['email'], 'Email')
+            nuevo_email = str(data['email'] or '').strip()
+            if Usuarios.objects.filter(email__iexact=nuevo_email).exclude(id=u.id).exists():
+                raise ValueError('Ese correo institucional ya esta registrado por otro usuario')
+            u.email = nuevo_email
+        if 'usuario' in data:
+            nuevo_usuario = str(data['usuario'] or '').strip().lower()
+            if nuevo_usuario:
+                if Usuarios.objects.filter(usuario__iexact=nuevo_usuario).exclude(id=u.id).exists():
+                    raise ValueError('Ese nombre de usuario ya esta registrado')
+                u.usuario = nuevo_usuario
+        if 'correo_personal' in data:
+            correo_personal = str(data['correo_personal'] or '').strip().lower()
+            if not correo_personal:
+                raise ValueError('El correo personal es obligatorio')
+            validar_email(correo_personal, 'Correo personal')
+            if Usuarios.objects.filter(correo_personal__iexact=correo_personal).exclude(id=u.id).exists():
+                raise ValueError('Ese correo personal ya esta registrado por otro usuario')
+            u.correo_personal = correo_personal
         if 'activo' in data:
             u.activo = data['activo']
         if 'rol' in data:
@@ -209,9 +279,15 @@ class UserService:
             'primer_apellido': u.primer_apellido,
             'segundo_apellido': u.segundo_apellido,
             'nombre_completo': u.nombre_completo,
+            'usuario': (getattr(u, 'usuario', '') or '').strip() or None,
             'email': u.email,
+            'correo_personal': getattr(u, 'correo_personal', None),
             'rol': u.rol.nombre if u.rol else None,
             'activo': u.activo,
+            'password_temporal': bool(getattr(u, 'password_temporal', False)),
+            'debe_cambiar_password': bool(getattr(u, 'debe_cambiar_password', False)),
+            'otp_habilitado': bool(getattr(u, 'otp_habilitado', False)),
+            'otp_metodo': getattr(u, 'otp_metodo', 'email') or 'email',
         }
         try:
             d['docente'] = self._docente_to_dict(u.docente)

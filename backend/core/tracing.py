@@ -64,6 +64,11 @@ def trace_service_class(cls):
     for name, attribute in list(cls.__dict__.items()):
         if name.startswith("_") or not callable(attribute):
             continue
+        # Los staticmethod/classmethod no reciben `self`: si se envuelven como
+        # funcion normal y se invocan desde una instancia se les pasa el `self`
+        # extra y la llamada falla. Se dejan intactos.
+        if isinstance(attribute, (staticmethod, classmethod)):
+            continue
         setattr(cls, name, trace_call("service", f"{cls.__name__}.{name}")(attribute))
     return cls
 

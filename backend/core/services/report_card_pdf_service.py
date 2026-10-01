@@ -69,7 +69,7 @@ class ReportCardPDFService:
 
         story = []
 
-        story.append(Paragraph('UNIDAD EDUCATIVA PANAMA', title_style))
+        story.append(Paragraph('FE Y ALEGRIA', title_style))
         story.append(Paragraph(f'BOLETA DE CALIFICACIONES', subtitle_style))
         story.append(Spacer(1, 6))
 

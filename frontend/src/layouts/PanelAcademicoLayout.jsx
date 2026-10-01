@@ -114,12 +114,12 @@ function PanelAcademicoLayout() {
           <div className="flex h-full flex-col">
             <div className={`flex-none ${sidebarCollapsed ? 'p-4 pb-0' : 'p-6 pb-0'}`}>
               <div className={`mb-6 flex items-center gap-4 ${sidebarCollapsed ? 'justify-center' : ''}`}>
-                <div className={`flex-shrink-0 rounded-md bg-indigo-50 ${sidebarCollapsed ? 'p-2' : 'p-3'}`}>
-                  <img src="/assets/login/logo-Colegio.png" alt="Logo" className={`flex-shrink-0 ${sidebarCollapsed ? 'h-8 w-8' : 'h-12 w-12'}`} />
+                  <div className={`flex-shrink-0 rounded-md bg-brand-50 ${sidebarCollapsed ? 'p-2' : 'p-3'}`}>
+                  <img src="/assets/login/logo-academico.png" alt="Logo Fe y Alegria" className={`flex-shrink-0 ${sidebarCollapsed ? 'h-8 w-8' : 'h-12 w-12'}`} />
                 </div>
                 {!sidebarCollapsed && (
                   <div>
-                    <h1 className="text-lg font-bold text-slate-900">U.E.Panama</h1>
+                    <h1 className="text-lg font-bold text-slate-900">Fe y Alegria</h1>
                     <p className="text-xs text-slate-400">{isDirector ? "Panel del director" : "Panel académico"}</p>
                   </div>
                 )}

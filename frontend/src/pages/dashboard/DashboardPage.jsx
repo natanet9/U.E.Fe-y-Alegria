@@ -145,7 +145,7 @@ function DashboardPage() {
         { label: "Muy Bueno", value: 0, color: "#3b82f6", description: "80-89 puntos" },
         { label: "Bueno", value: 0, color: "#f59e0b", description: "70-79 puntos" },
         { label: "Suficiente", value: 0, color: "#f97316", description: "61-69 puntos" },
-        { label: "Reprobado", value: 0, color: "#ef4444", description: "Menos de 61 puntos" },
+        { label: "Reprobado", value: 0, color: "#f59e0b", description: "Menos de 61 puntos" },
       ],
     [rendimiento],
   );
@@ -234,7 +234,7 @@ function DashboardPage() {
       <header className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,rgba(15,23,42,0.06),rgba(255,255,255,0.97),rgba(37,99,235,0.05))] p-8 shadow-[0_18px_70px_rgba(15,23,42,0.05)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">U.E. Panama</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">Fe y Alegria</p>
             <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950">
               {greetingName ? `Bienvenido, ${greetingName}` : dashboardTitle}
             </h1>

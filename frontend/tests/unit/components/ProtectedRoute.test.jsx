@@ -54,6 +54,32 @@ describe("ProtectedRoute", () => {
     });
   });
 
+  it("redirige al cambio obligatorio cuando la contrasena es temporal", async () => {
+    isAuthenticated.mockReturnValue(true);
+    getStoredUser.mockReturnValue({ cargo: "tutor", debe_cambiar_password: true });
+    getCurrentUser.mockResolvedValue({ id: 1, rol: "tutor", debe_cambiar_password: true });
+
+    render(
+      <MemoryRouter initialEntries={["/dashboard"]}>
+        <Routes>
+          <Route path="/cambiar-password-obligatorio" element={<div>cambio obligatorio</div>} />
+          <Route
+            path="/dashboard"
+            element={(
+              <ProtectedRoute>
+                <div>protected content</div>
+              </ProtectedRoute>
+            )}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/cambio obligatorio/i)).toBeInTheDocument();
+    });
+  });
+
   it("redirige al dashboard cuando el rol no coincide", async () => {
     isAuthenticated.mockReturnValue(true);
     getStoredUser.mockReturnValue({ cargo: "estudiante" });

@@ -17,7 +17,7 @@ export async function createDocente(payload) {
     nombre: payload.nombres || payload.nombre,
     primer_apellido: payload.primer_apellido || "",
     ci: payload.ci,
-    email: payload.email || `${(payload.nombres || "").toLowerCase().replace(/\s+/g, ".")}.${(payload.primer_apellido || "").toLowerCase()}@uepanama`,
+    email: payload.email || `${(payload.nombres || "").toLowerCase().replace(/\s+/g, ".")}.${(payload.primer_apellido || "").toLowerCase()}@feyalegria`,
     rol: payload.rol || "docente",
     password: payload.password || "123456",
   };

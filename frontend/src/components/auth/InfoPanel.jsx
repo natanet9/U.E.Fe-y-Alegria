@@ -4,12 +4,12 @@ function InfoPanel() {
       <img
         className="w-24 h-24 object-contain mb-4"
         loading="lazy"
-        alt="Logo Unidad Educativa Republica de Panama"
-        src="/assets/login/logo-Colegio.png"
+        alt="Logo Fe y Alegria"
+        src="/assets/login/logo-academico.png"
       />
 
       <h1 className="m-0 text-white text-4xl md:text-5xl font-bold tracking-wide">
-        Sistema Academico
+        Fe y Alegria
       </h1>
 
       <p className="m-0 mt-3 text-white/95 text-base md:text-lg leading-relaxed max-w-xl">
