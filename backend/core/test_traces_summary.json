@@ -1,0 +1,1601 @@
+{
+  "traces": [
+    {
+      "kind": "database",
+      "name": "connect[default]",
+      "status": "ok",
+      "elapsed_ms": 6.8,
+      "backend": "django.db.backends.sqlite3"
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.02
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.42
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.59
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 1.79
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.generar_password_temporal",
+      "status": "ok",
+      "elapsed_ms": 0.07
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.9
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.estado",
+      "status": "ok",
+      "elapsed_ms": 0.18
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.habilitar_inicial",
+      "status": "ok",
+      "elapsed_ms": 2.52
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.79
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 480.39
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.26
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.36
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.9
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.generar_password_temporal",
+      "status": "ok",
+      "elapsed_ms": 0.06
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.estado",
+      "status": "ok",
+      "elapsed_ms": 0.27
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.habilitar_inicial",
+      "status": "ok",
+      "elapsed_ms": 0.35
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.9
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 415.62
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.28
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.37
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.77
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 2.1
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.21
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.27
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.29
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.generar_password_temporal",
+      "status": "ok",
+      "elapsed_ms": 0.04
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.6
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.estado",
+      "status": "ok",
+      "elapsed_ms": 0.1
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.habilitar_inicial",
+      "status": "ok",
+      "elapsed_ms": 1.78
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.62
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 425.5
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.07
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.13
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.5
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 2.27
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.28
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.37
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.37
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.generar_password_temporal",
+      "status": "ok",
+      "elapsed_ms": 0.06
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.36
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.estado",
+      "status": "ok",
+      "elapsed_ms": 0.08
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.habilitar_inicial",
+      "status": "ok",
+      "elapsed_ms": 1.16
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.43
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 441.97
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.invalidar_codigos",
+      "status": "ok",
+      "elapsed_ms": 1.32
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.crear_codigo",
+      "status": "ok",
+      "elapsed_ms": 2.8
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.enviar_codigo",
+      "status": "ok",
+      "elapsed_ms": 4.21
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.iniciar_desafio_login",
+      "status": "ok",
+      "elapsed_ms": 4.6
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.login",
+      "status": "ok",
+      "elapsed_ms": 413.81
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.validar_codigo",
+      "status": "ok",
+      "elapsed_ms": 3.44
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.verificar_desafio_login",
+      "status": "ok",
+      "elapsed_ms": 6.07
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.verify_otp",
+      "status": "ok",
+      "elapsed_ms": 8.12
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.change_password",
+      "status": "ok",
+      "elapsed_ms": 1256.95
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.28
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.38
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.49
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.generar_password_temporal",
+      "status": "ok",
+      "elapsed_ms": 0.06
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.29
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.estado",
+      "status": "ok",
+      "elapsed_ms": 0.07
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.habilitar_inicial",
+      "status": "ok",
+      "elapsed_ms": 0.82
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.33
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 403.69
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.invalidar_codigos",
+      "status": "ok",
+      "elapsed_ms": 1.02
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.crear_codigo",
+      "status": "ok",
+      "elapsed_ms": 1.83
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.enviar_codigo",
+      "status": "ok",
+      "elapsed_ms": 3.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.iniciar_desafio_login",
+      "status": "ok",
+      "elapsed_ms": 3.19
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.login",
+      "status": "ok",
+      "elapsed_ms": 442.04
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.validar_codigo",
+      "status": "ok",
+      "elapsed_ms": 2.43
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.verificar_desafio_login",
+      "status": "ok",
+      "elapsed_ms": 4.76
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.verify_otp",
+      "status": "ok",
+      "elapsed_ms": 4.96
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.25
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.32
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.55
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.generar_password_temporal",
+      "status": "ok",
+      "elapsed_ms": 0.09
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.56
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.estado",
+      "status": "ok",
+      "elapsed_ms": 0.1
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.habilitar_inicial",
+      "status": "ok",
+      "elapsed_ms": 1.54
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.55
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 438.93
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.invalidar_codigos",
+      "status": "ok",
+      "elapsed_ms": 0.78
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.crear_codigo",
+      "status": "ok",
+      "elapsed_ms": 1.52
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.enviar_codigo",
+      "status": "ok",
+      "elapsed_ms": 2.68
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.iniciar_desafio_login",
+      "status": "ok",
+      "elapsed_ms": 2.85
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.login",
+      "status": "ok",
+      "elapsed_ms": 453.57
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.invalidar_codigos",
+      "status": "ok",
+      "elapsed_ms": 0.72
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.crear_codigo",
+      "status": "ok",
+      "elapsed_ms": 1.46
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.enviar_codigo",
+      "status": "ok",
+      "elapsed_ms": 2.41
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.reenviar_codigo_login",
+      "status": "ok",
+      "elapsed_ms": 4.28
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.reenviar_codigo_otp",
+      "status": "ok",
+      "elapsed_ms": 4.36
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.23
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.29
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.32
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.generar_password_temporal",
+      "status": "ok",
+      "elapsed_ms": 0.04
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.55
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.estado",
+      "status": "ok",
+      "elapsed_ms": 0.09
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.habilitar_inicial",
+      "status": "ok",
+      "elapsed_ms": 1.43
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.46
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 425.41
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.14
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.19
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.37
+    },
+    {
+      "kind": "service",
+      "name": "EstudianteTutorService.crear",
+      "status": "ok",
+      "elapsed_ms": 3.01
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.invalidar_codigos",
+      "status": "ok",
+      "elapsed_ms": 0.65
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.crear_codigo",
+      "status": "ok",
+      "elapsed_ms": 1.3
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.enviar_codigo",
+      "status": "ok",
+      "elapsed_ms": 2.31
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.iniciar_recuperacion",
+      "status": "ok",
+      "elapsed_ms": 2.36
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.solicitar_codigo_recuperacion",
+      "status": "ok",
+      "elapsed_ms": 4.17
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.validar_codigo",
+      "status": "ok",
+      "elapsed_ms": 1.45
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.validar_codigo_recuperacion",
+      "status": "ok",
+      "elapsed_ms": 1.62
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.invalidar_codigos",
+      "status": "ok",
+      "elapsed_ms": 0.46
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.reset_password_con_codigo",
+      "status": "ok",
+      "elapsed_ms": 443.54
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.33
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.42
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.5
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.generar_password_temporal",
+      "status": "ok",
+      "elapsed_ms": 0.05
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.29
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.estado",
+      "status": "ok",
+      "elapsed_ms": 0.07
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.habilitar_inicial",
+      "status": "ok",
+      "elapsed_ms": 0.82
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.35
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 431.31
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.09
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.14
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.33
+    },
+    {
+      "kind": "service",
+      "name": "EstudianteTutorService.crear",
+      "status": "ok",
+      "elapsed_ms": 2.28
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.invalidar_codigos",
+      "status": "ok",
+      "elapsed_ms": 0.55
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.crear_codigo",
+      "status": "ok",
+      "elapsed_ms": 1.11
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.enviar_codigo",
+      "status": "ok",
+      "elapsed_ms": 1.87
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.iniciar_recuperacion",
+      "status": "ok",
+      "elapsed_ms": 1.92
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.solicitar_codigo_recuperacion",
+      "status": "ok",
+      "elapsed_ms": 3.32
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.validar_codigo",
+      "status": "ok",
+      "elapsed_ms": 0.78
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.validar_codigo_recuperacion",
+      "status": "ok",
+      "elapsed_ms": 0.88
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.verificar_codigo_recuperacion",
+      "status": "ok",
+      "elapsed_ms": 2.23
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.invalidar_codigos",
+      "status": "ok",
+      "elapsed_ms": 0.62
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.reset_password",
+      "status": "ok",
+      "elapsed_ms": 413.77
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.validar_codigo",
+      "status": "ok",
+      "elapsed_ms": 1.02
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.validar_codigo_recuperacion",
+      "status": "ok",
+      "elapsed_ms": 1.26
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.reset_password_con_codigo",
+      "status": "error",
+      "elapsed_ms": 3.19
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.23
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.29
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.34
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.generar_password_temporal",
+      "status": "ok",
+      "elapsed_ms": 0.05
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.32
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.estado",
+      "status": "ok",
+      "elapsed_ms": 0.07
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.habilitar_inicial",
+      "status": "ok",
+      "elapsed_ms": 0.9
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.31
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 393.11
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.12
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.17
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.33
+    },
+    {
+      "kind": "service",
+      "name": "EstudianteTutorService.crear",
+      "status": "ok",
+      "elapsed_ms": 2.29
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.invalidar_codigos",
+      "status": "ok",
+      "elapsed_ms": 0.56
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.crear_codigo",
+      "status": "ok",
+      "elapsed_ms": 1.05
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.enviar_codigo",
+      "status": "ok",
+      "elapsed_ms": 1.83
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.iniciar_recuperacion",
+      "status": "ok",
+      "elapsed_ms": 1.87
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.solicitar_codigo_recuperacion",
+      "status": "ok",
+      "elapsed_ms": 3.44
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.validar_codigo",
+      "status": "ok",
+      "elapsed_ms": 1.67
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.validar_codigo_recuperacion",
+      "status": "ok",
+      "elapsed_ms": 1.86
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.reset_password_con_codigo",
+      "status": "error",
+      "elapsed_ms": 3.15
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.23
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.28
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.29
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.generar_password_temporal",
+      "status": "ok",
+      "elapsed_ms": 0.05
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.28
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.estado",
+      "status": "ok",
+      "elapsed_ms": 0.07
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.habilitar_inicial",
+      "status": "ok",
+      "elapsed_ms": 0.81
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.3
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 391.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.15
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.2
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.31
+    },
+    {
+      "kind": "service",
+      "name": "EstudianteTutorService.crear",
+      "status": "ok",
+      "elapsed_ms": 2.49
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_tutor",
+      "status": "ok",
+      "elapsed_ms": 0.66
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_tutor",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_estudiantes_ids_tutor",
+      "status": "ok",
+      "elapsed_ms": 0.65
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.41
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_ver_todo",
+      "status": "ok",
+      "elapsed_ms": 0.47
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_docente",
+      "status": "ok",
+      "elapsed_ms": 0.04
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_tutor",
+      "status": "ok",
+      "elapsed_ms": 0.04
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_tutor",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_estudiantes_ids_tutor",
+      "status": "ok",
+      "elapsed_ms": 0.55
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_estudiantes_autorizados",
+      "status": "ok",
+      "elapsed_ms": 1.35
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_tutor",
+      "status": "ok",
+      "elapsed_ms": 0.63
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_estudiantes_ids_tutor",
+      "status": "ok",
+      "elapsed_ms": 0.71
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.25
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.32
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.38
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.generar_password_temporal",
+      "status": "ok",
+      "elapsed_ms": 0.04
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.28
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.email_destino",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.estado",
+      "status": "ok",
+      "elapsed_ms": 0.06
+    },
+    {
+      "kind": "service",
+      "name": "OTPService.habilitar_inicial",
+      "status": "ok",
+      "elapsed_ms": 0.83
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.35
+    },
+    {
+      "kind": "service",
+      "name": "TutoresService.crear",
+      "status": "ok",
+      "elapsed_ms": 396.43
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.11
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.15
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.39
+    },
+    {
+      "kind": "service",
+      "name": "EstudianteTutorService.crear",
+      "status": "ok",
+      "elapsed_ms": 2.83
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.0
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.21
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.28
+    },
+    {
+      "kind": "service",
+      "name": "AuditService.record",
+      "status": "ok",
+      "elapsed_ms": 0.4
+    },
+    {
+      "kind": "service",
+      "name": "EstudianteTutorService.crear",
+      "status": "ok",
+      "elapsed_ms": 2.3
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.get_role_name",
+      "status": "ok",
+      "elapsed_ms": 0.01
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.es_secretaria",
+      "status": "ok",
+      "elapsed_ms": 0.1
+    },
+    {
+      "kind": "service",
+      "name": "AccessControlService.puede_gestionar_inscripciones",
+      "status": "ok",
+      "elapsed_ms": 0.14
+    },
+    {
+      "kind": "service",
+      "name": "EstudianteTutorService.crear",
+      "status": "ok",
+      "elapsed_ms": 1.41
+    },
+    {
+      "kind": "view",
+      "name": "forgot_password_view",
+      "status": "ok",
+      "elapsed_ms": 0.33
+    },
+    {
+      "kind": "view",
+      "name": "forgot_password_view",
+      "status": "ok",
+      "elapsed_ms": 0.28
+    },
+    {
+      "kind": "view",
+      "name": "forgot_password_view",
+      "status": "ok",
+      "elapsed_ms": 0.17
+    },
+    {
+      "kind": "view",
+      "name": "verify_reset_code_view",
+      "status": "ok",
+      "elapsed_ms": 0.12
+    },
+    {
+      "kind": "view",
+      "name": "verify_reset_code_view",
+      "status": "ok",
+      "elapsed_ms": 0.15
+    },
+    {
+      "kind": "view",
+      "name": "verify_reset_code_view",
+      "status": "ok",
+      "elapsed_ms": 0.15
+    },
+    {
+      "kind": "view",
+      "name": "reset_password_view",
+      "status": "ok",
+      "elapsed_ms": 0.12
+    },
+    {
+      "kind": "view",
+      "name": "reset_password_view",
+      "status": "ok",
+      "elapsed_ms": 0.13
+    },
+    {
+      "kind": "view",
+      "name": "reset_password_view",
+      "status": "ok",
+      "elapsed_ms": 0.13
+    },
+    {
+      "kind": "view",
+      "name": "reset_password_view",
+      "status": "ok",
+      "elapsed_ms": 0.19
+    },
+    {
+      "kind": "view",
+      "name": "reset_password_view",
+      "status": "ok",
+      "elapsed_ms": 0.15
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.solicitar_reset",
+      "status": "ok",
+      "elapsed_ms": 0.06
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.solicitar_reset",
+      "status": "ok",
+      "elapsed_ms": 0.03
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.reset_password",
+      "status": "ok",
+      "elapsed_ms": 2.95
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.reset_password",
+      "status": "error",
+      "elapsed_ms": 0.03
+    },
+    {
+      "kind": "service",
+      "name": "AuthService.reset_password_con_codigo",
+      "status": "ok",
+      "elapsed_ms": 0.6
+    }
+  ]
+}

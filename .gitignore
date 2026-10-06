@@ -43,7 +43,7 @@ htmlcov/
 .coverage
 coverage.xml
 report.xml
-*.json
+
 
 # ========================
 # Temporary files
