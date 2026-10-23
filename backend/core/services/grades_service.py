@@ -1,4 +1,3 @@
-from django.db import connection
 from django.db.models import Avg
 from django.utils import timezone
 
@@ -171,67 +170,144 @@ class GradesService:
             result.setdefault(act_key, {})[est_key] = float(an.valor) if an.valor is not None else None
         return result
 
-    def _get_notas_dimension(self, docente_asignacion_id, periodo_id=None):
+    def _calcular_notas_dimension(self, docente_asignacion_id, periodo_id):
+        """Calcula nota por (estudiante, dimension) usando ORM puro.
+
+        Lógica equivalente a la vista v_notas_por_dimension:
+          - Promedia las notas de las actividades de cada dimensión
+            (cada actividad pesa igual, normalizada sobre su puntaje_maximo)
+          - Escala el promedio al puntaje_maximo configurado para esa dimensión
+            en el período (DimensionConfigPeriodo) o al puntaje de la dimensión.
+
+        Retorna dict: {str(estudiante_id): {str(dimension_id): nota_float}}
+        """
         if not periodo_id:
-            return []
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """SELECT estudiante_id, dimension_id, nota_dimension, promedio_porcentual
-                   FROM v_notas_por_dimension
-                   WHERE docente_asignacion_id = %s AND periodo_id = %s""",
-                [docente_asignacion_id, periodo_id],
+            return {}
+
+        # Obtener puntajes máximos configurados por dimensión en este período
+        config_map = {
+            c.dimension_id: float(c.puntaje_maximo)
+            for c in DimensionConfigPeriodo.objects.filter(periodo_id=periodo_id)
+        }
+        # Fallback al puntaje de la dimensión si no hay config
+        dim_puntaje_map = {
+            d.id: float(d.puntaje_maximo or 0)
+            for d in DimensionesEvaluacion.objects.all()
+        }
+
+        # Traer todas las notas de actividades de esta asignación/período
+        notas_qs = (
+            ActividadNotas.objects
+            .filter(
+                actividad__docente_asignacion_id=docente_asignacion_id,
+                actividad__periodo_id=periodo_id,
             )
-            rows = cursor.fetchall()
+            .select_related('actividad')
+            .values('estudiante_id', 'actividad__dimension_id',
+                    'actividad__puntaje_maximo', 'valor')
+        )
+
+        # Agrupar por (estudiante, dimension) → lista de (valor, puntaje_max)
+        grupos = {}
+        for row in notas_qs:
+            key = (row['estudiante_id'], row['actividad__dimension_id'])
+            grupos.setdefault(key, []).append((
+                float(row['valor'] or 0),
+                float(row['actividad__puntaje_maximo'] or 0),
+            ))
+
         result = {}
-        for estudiante_id, dim_id, nota, promedio in rows:
-            result.setdefault(str(estudiante_id), {})[str(dim_id)] = float(nota)
+        for (est_id, dim_id), pares in grupos.items():
+            puntaje_dim = config_map.get(dim_id, dim_puntaje_map.get(dim_id, 0))
+            # Promedio de ratios (valor / puntaje_maximo_actividad)
+            ratios = [v / p for v, p in pares if p > 0]
+            if ratios:
+                promedio = sum(ratios) / len(ratios)
+                nota = round(promedio * puntaje_dim, 2)
+            else:
+                nota = 0.0
+            result.setdefault(str(est_id), {})[str(dim_id)] = nota
+
         return result
+
+    def _get_notas_dimension(self, docente_asignacion_id, periodo_id=None):
+        """Interfaz compatible con el código existente."""
+        return self._calcular_notas_dimension(docente_asignacion_id, periodo_id)
 
     def get_notas_totales(self, usuario, docente_asignacion_id, periodo_id):
         if not self.ac.puede_editar_notas(usuario, docente_asignacion_id) and not self.ac.puede_ver_todo(usuario):
             raise PermissionError('No tienes permisos para ver estas notas')
 
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """SELECT estudiante_id, periodo_id, nota_total, dimensiones_evaluadas
-                   FROM v_notas_totales
-                   WHERE docente_asignacion_id = %s AND periodo_id = %s""",
-                [docente_asignacion_id, periodo_id],
-            )
-            rows = cursor.fetchall()
-        return [
-            {
-                'estudiante_id': r[0],
-                'periodo_id': r[1],
-                'nota_total': float(r[2]) if r[2] else 0,
-                'dimensiones_evaluadas': r[3],
-            }
-            for r in rows
-        ]
+        notas_dim = self._calcular_notas_dimension(docente_asignacion_id, periodo_id)
+        result = []
+        for est_id_str, dims in notas_dim.items():
+            total = round(sum(dims.values()), 2)
+            result.append({
+                'estudiante_id': int(est_id_str),
+                'periodo_id': periodo_id,
+                'nota_total': total,
+                'dimensiones_evaluadas': len(dims),
+            })
+        return result
 
-    def get_notas_por_dimension(self, usuario, docente_asignacion_id, periodo_id):
-        if not self.ac.puede_editar_notas(usuario, docente_asignacion_id) and not self.ac.puede_ver_todo(usuario):
-            raise PermissionError('No tienes permisos para ver estas notas')
+    def get_notas_por_dimension(self, usuario, docente_asignacion_id, periodo_id, _skip_perm_check=False):
+        if not _skip_perm_check:
+            if not self.ac.puede_editar_notas(usuario, docente_asignacion_id) and not self.ac.puede_ver_todo(usuario):
+                raise PermissionError('No tienes permisos para ver estas notas')
 
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """SELECT v.estudiante_id, v.dimension_id, v.nota_dimension, v.promedio_porcentual,
-                          v.puntaje_dimension, d.nombre AS dimension_nombre
-                   FROM v_notas_por_dimension v
-                   JOIN dimensiones_evaluacion d ON d.id = v.dimension_id
-                   WHERE v.docente_asignacion_id = %s AND v.periodo_id = %s
-                   ORDER BY v.estudiante_id, d.orden""",
-                [docente_asignacion_id, periodo_id],
+        config_map = {
+            c.dimension_id: float(c.puntaje_maximo)
+            for c in DimensionConfigPeriodo.objects.filter(periodo_id=periodo_id)
+        }
+        dims = {d.id: d for d in DimensionesEvaluacion.objects.all().order_by('orden')}
+
+        notas_qs = (
+            ActividadNotas.objects
+            .filter(
+                actividad__docente_asignacion_id=docente_asignacion_id,
+                actividad__periodo_id=periodo_id,
             )
-            rows = cursor.fetchall()
-        return [
-            {
-                'estudiante_id': r[0],
-                'dimension_id': r[1],
-                'nota': float(r[2]) if r[2] else 0,
-                'promedio': float(r[3]) if r[3] else 0,
-                'puntaje_maximo': float(r[4]) if r[4] else 0,
-                'dimension_nombre': r[5],
-            }
-            for r in rows
-        ]
+            .select_related('actividad')
+            .values('estudiante_id', 'actividad__dimension_id',
+                    'actividad__puntaje_maximo', 'valor')
+        )
+
+        grupos = {}
+        for row in notas_qs:
+            key = (row['estudiante_id'], row['actividad__dimension_id'])
+            grupos.setdefault(key, []).append((
+                float(row['valor'] or 0),
+                float(row['actividad__puntaje_maximo'] or 0),
+            ))
+
+        result = []
+        for (est_id, dim_id), pares in grupos.items():
+            dim = dims.get(dim_id)
+            puntaje_dim = config_map.get(dim_id, float(dim.puntaje_maximo or 0) if dim else 0)
+            ratios = [v / p for v, p in pares if p > 0]
+            if ratios:
+                promedio = sum(ratios) / len(ratios)
+                nota = round(promedio * puntaje_dim, 2)
+            else:
+                promedio = 0.0
+                nota = 0.0
+            result.append({
+                'estudiante_id': est_id,
+                'dimension_id': dim_id,
+                'nota': nota,
+                'promedio': round(promedio, 4) if ratios else 0.0,
+                'puntaje_maximo': puntaje_dim,
+                'dimension_nombre': dim.nombre if dim else '',
+            })
+        # Ordenar por estudiante y orden de dimensión
+        result.sort(key=lambda r: (r['estudiante_id'], dims[r['dimension_id']].orden if r['dimension_id'] in dims else 0))
+        return result
+
+    def get_notas_por_dimension_interno(self, docente_asignacion_id, periodo_id):
+        """Versión sin verificación de permisos para uso interno (ej. reports_service)."""
+        return self.get_notas_por_dimension(
+            usuario=None,
+            docente_asignacion_id=docente_asignacion_id,
+            periodo_id=periodo_id,
+            _skip_perm_check=True,
+        )

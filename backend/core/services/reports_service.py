@@ -1,6 +1,5 @@
 from io import BytesIO
 
-from django.db import connection
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, Side, PatternFill
 from docx import Document
@@ -101,30 +100,25 @@ class ReportsService:
         return buf
 
     def _get_notas_dim(self, docente_asignacion_id, periodo_id):
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """SELECT v.estudiante_id, d.nombre, v.nota_dimension
-                   FROM v_notas_por_dimension v
-                   JOIN dimensiones_evaluacion d ON d.id = v.dimension_id
-                   WHERE v.docente_asignacion_id = %s AND v.periodo_id = %s""",
-                [docente_asignacion_id, periodo_id],
-            )
-            rows = cursor.fetchall()
+        """Retorna {estudiante_id: {dim_nombre: nota}} usando ORM puro."""
+        from .grades_service import GradesService
+        notas_por_dim = GradesService().get_notas_por_dimension_interno(
+            docente_asignacion_id, periodo_id
+        )
         result = {}
-        for est_id, dim_nombre, nota in rows:
-            result.setdefault(est_id, {})[dim_nombre] = float(nota) if nota else 0
+        for row in notas_por_dim:
+            result.setdefault(row['estudiante_id'], {})[row['dimension_nombre']] = row['nota']
         return result
 
     def _get_notas_tot(self, docente_asignacion_id, periodo_id):
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """SELECT estudiante_id, nota_total
-                   FROM v_notas_totales
-                   WHERE docente_asignacion_id = %s AND periodo_id = %s""",
-                [docente_asignacion_id, periodo_id],
-            )
-            rows = cursor.fetchall()
-        return {r[0]: float(r[1]) if r[1] else 0 for r in rows}
+        """Retorna {estudiante_id: nota_total} usando ORM puro."""
+        from .grades_service import GradesService
+        gs = GradesService()
+        notas_dim = gs._calcular_notas_dimension(docente_asignacion_id, periodo_id)
+        return {
+            int(est_id): round(sum(dims.values()), 2)
+            for est_id, dims in notas_dim.items()
+        }
 
     def get_audit_load_summary(self, usuario, since=None, until=None, tabla=None):
         if not self.ac.puede_ver_auditoria(usuario):

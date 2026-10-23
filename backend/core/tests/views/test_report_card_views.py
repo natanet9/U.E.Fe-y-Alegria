@@ -54,3 +54,40 @@ class TestReportCardView:
         with patch("core.views.ReportCardService.generar_boletin", side_effect=ValueError("sin inscripciones")):
             response = report_card_view(request)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+class TestReportCardDownloadView:
+
+    def test_download_requires_auth(self):
+        from core.views import report_card_download_view
+        factory = APIRequestFactory()
+        request = factory.get("/api/report-card/download/?estudiante_id=1")
+        response = report_card_download_view(request)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_download_missing_estudiante_id(self):
+        from core.views import report_card_download_view
+        factory = APIRequestFactory()
+        request = factory.get("/api/report-card/download/")
+        request.usuario = SimpleNamespace(id=1, activo=True, nombre_completo="Admin", email="admin@test.com")
+        response = report_card_download_view(request)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_download_docx_success(self):
+        from core.views import report_card_download_view
+        factory = APIRequestFactory()
+        request = factory.get("/api/report-card/download/?estudiante_id=1&gestion=2026&fmt=docx")
+        request.usuario = SimpleNamespace(id=1, activo=True, nombre_completo="Admin", email="admin@test.com")
+        with patch("core.services.report_card_docx_service.ReportCardDOCXService.generar_docx", return_value=b"PKfake_docx"):
+            response = report_card_download_view(request)
+        assert response.status_code == status.HTTP_200_OK
+        assert response["Content-Type"] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        assert 'attachment; filename="boletin_1.docx"' in response["Content-Disposition"]
+
+    def test_download_unsupported_fmt(self):
+        from core.views import report_card_download_view
+        factory = APIRequestFactory()
+        request = factory.get("/api/report-card/download/?estudiante_id=1&fmt=xyz")
+        request.usuario = SimpleNamespace(id=1, activo=True, nombre_completo="Admin", email="admin@test.com")
+        response = report_card_download_view(request)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST

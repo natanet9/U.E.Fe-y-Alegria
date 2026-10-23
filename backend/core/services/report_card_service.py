@@ -84,7 +84,7 @@ class ReportCardService:
 
         asignaciones = list(DocenteAsignacion.objects.filter(
             curso=curso, gestion=gestion, activo=True
-        ).select_related('area'))
+        ).select_related('area', 'docente__usuario'))
 
         da_ids = [da.id for da in asignaciones]
         periodo_ids = [p.id for p in periodos]
@@ -101,7 +101,7 @@ class ReportCardService:
                     'docente_asignacion_id': da.id,
                     'area_id': area_id,
                     'area': da.area.nombre,
-                    'docente': da.usuario.nombre_completo,
+                    'docente': da.usuario.nombre_completo if da.usuario else None,
                     'notas_por_periodo': {},
                 }
             entry = materias_map[area_id]
@@ -203,62 +203,40 @@ class ReportCardService:
                 curso=curso, gestion=gestion, estado='activo'
             ).select_related('estudiante')
 
-            estudiante_ids = [ins.estudiante_id for ins in inscripciones]
-            if not estudiante_ids:
-                continue
-
-            # Get all DA ids for this course
-            da_ids = list(DocenteAsignacion.objects.filter(
-                curso=curso, gestion=gestion, activo=True
-            ).values_list('id', flat=True))
-
-            if not da_ids:
-                continue
-
-            # Bulk fetch all notas for all students in this course in one query
-            placeholders_da = ','.join(['%s'] * len(da_ids))
-            placeholders_per = ','.join(['%s'] * len(periodo_ids))
-            placeholders_est = ','.join(['%s'] * len(estudiante_ids))
-            sql = f"""SELECT estudiante_id, docente_asignacion_id, periodo_id, nota_total
-                       FROM v_notas_totales
-                      WHERE estudiante_id IN ({placeholders_est})
-                        AND docente_asignacion_id IN ({placeholders_da})
-                        AND periodo_id IN ({placeholders_per})"""
-            params = list(estudiante_ids) + list(da_ids) + list(periodo_ids)
-            with connection.cursor() as cursor:
-                cursor.execute(sql, params)
-                rows = cursor.fetchall()
-
-            # Index: (estudiante_id, da_id, periodo_id) -> nota_total
-            notas_index = {}
-            for est_id, da_pk, per_id, nota in rows:
-                key = (est_id, da_pk, per_id)
-                notas_index[key] = float(nota) if nota is not None else None
-
             estudiantes_data = []
             for ins in inscripciones:
-                eid = ins.estudiante_id
-                promedios_por_periodo = {}
-                for p in periodos:
-                    notas_periodo = []
-                    for da_pk in da_ids:
-                        nota = notas_index.get((eid, da_pk, p.id))
-                        if nota is not None:
-                            notas_periodo.append(nota)
-                    promedios_por_periodo[str(p.id)] = round(sum(notas_periodo) / len(notas_periodo), 2) if notas_periodo else None
+                try:
+                    boletin = self.generar_boletin(usuario, ins.estudiante_id, gestion=gestion)
+                    promedios_por_periodo = {}
+                    for p in periodos:
+                        pid_str = str(p.id)
+                        notas_periodo = []
+                        for m in boletin.get('materias', []):
+                            val = m.get('notas_por_periodo', {}).get(pid_str)
+                            if val is not None:
+                                notas_periodo.append(val)
+                        promedios_por_periodo[pid_str] = (
+                            round(sum(notas_periodo) / len(notas_periodo), 2)
+                            if notas_periodo else None
+                        )
 
-                valores = [v for v in promedios_por_periodo.values() if v is not None]
-                promedio_general = round(sum(valores) / len(valores), 2) if valores else None
+                    valores = [v for v in promedios_por_periodo.values() if v is not None]
+                    promedio_general = (
+                        round(sum(valores) / len(valores), 2)
+                        if valores else None
+                    )
 
-                estudiantes_data.append({
-                    'estudiante_id': eid,
-                    'rude': ins.estudiante.rude,
-                    'nombres': ins.estudiante.nombres,
-                    'primer_apellido': ins.estudiante.primer_apellido,
-                    'segundo_apellido': ins.estudiante.segundo_apellido or '',
-                    'promedios_por_periodo': promedios_por_periodo,
-                    'promedio_general': promedio_general,
-                })
+                    estudiantes_data.append({
+                        'estudiante_id': ins.estudiante_id,
+                        'rude': ins.estudiante.rude,
+                        'nombres': ins.estudiante.nombres,
+                        'primer_apellido': ins.estudiante.primer_apellido,
+                        'segundo_apellido': ins.estudiante.segundo_apellido or '',
+                        'promedios_por_periodo': promedios_por_periodo,
+                        'promedio_general': promedio_general,
+                    })
+                except Exception:
+                    continue
 
             if estudiantes_data:
                 resultado.append({

@@ -10,6 +10,7 @@ const menu = [
   { to: "/docentes", label: "Docentes", icon: "users", rolesVisibles: ["director", "secretaria", "regente"] },
   { to: "/inscripcion", label: "Inscripción", icon: "users", rolesVisibles: ["director", "secretaria"] },
   { to: "/cursos", label: "Cursos", icon: "book", rolesVisibles: ["director", "secretaria", "regente", "docente"] },
+  { to: "/mis-areas", label: "Mis Áreas", icon: "book", rolesVisibles: ["docente"] },
   { to: "/calificaciones", label: "Calificaciones", icon: "grade", rolesVisibles: ["director", "secretaria", "regente", "docente", "estudiante"] },
   { to: "/horarios", label: "Horarios", icon: "calendar", rolesVisibles: ["director", "secretaria", "regente", "docente"] },
   { to: "/reportes", label: "Reportes", icon: "report", rolesVisibles: ["director", "secretaria", "regente"] },
@@ -18,8 +19,8 @@ const menu = [
   { to: "/dimensiones", label: "Dimensiones", icon: "chart", rolesVisibles: ["director"] },
   { to: "/usuarios", label: "Usuarios", icon: "users", rolesVisibles: ["director"] },
   { to: "/licencias", label: "Licencias", icon: "report", rolesVisibles: ["director", "secretaria", "regente"] },
-
 ];
+
 
 function Icon({ name, className = "w-5 h-5" }) {
   switch (name) {

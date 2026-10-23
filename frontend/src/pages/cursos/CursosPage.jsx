@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
-import { createCourse, getCoursesPage, deleteCourse, restoreCourse, getCourseDetail, getCoursesDetails } from "../../services/coursesService";
+import { createCourse, getCoursesPage, getCoursesDetails } from "../../services/coursesService";
 import { getStoredUser } from "../../services/authService";
 import Toast from "../../components/Toast";
 
@@ -60,13 +60,28 @@ function CursoCard({ curso }) {
 
         {/* Action */}
         <div className="mt-4">
-          {curso.asignacion_ids?.length > 0 ? (
+          {curso.asignacion_ids?.length === 1 ? (
             <a
               href={`/cursos/detalle?docente_asignacion_id=${curso.asignacion_ids[0]}`}
               className="block rounded-2xl bg-slate-900 px-4 py-3 text-center text-sm font-bold text-white transition hover:bg-slate-800"
             >
               Ver detalle
             </a>
+          ) : curso.asignacion_ids?.length > 1 ? (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Áreas asignadas</p>
+              <div className="flex flex-wrap gap-2">
+                {curso.asignacion_ids.map((id, idx) => (
+                  <a
+                    key={id}
+                    href={`/cursos/detalle?docente_asignacion_id=${id}`}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
+                  >
+                    {curso.areas && curso.areas[idx] ? curso.areas[idx] : `Área ${idx + 1}`}
+                  </a>
+                ))}
+              </div>
+            </div>
           ) : (
             <p className="rounded-2xl border border-dashed border-slate-200 px-4 py-3 text-center text-xs font-semibold text-slate-400">
               Sin docente asignado
@@ -111,6 +126,7 @@ function CursosPage() {
   const [saving, setSaving] = useState(false);
 
   const puedeGestionar = usuario?.rol === "secretaria" || usuario?.rol === "director";
+  const isDocente = (usuario?.rol || "").toLowerCase() === "docente";
   const cursos = data?.cursos || EMPTY_ARRAY;
   const catalogos = data?.catalogos || {};
   const total = data?.total || 0;
@@ -208,10 +224,14 @@ function CursosPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">Fe y Alegria</p>
-            <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">Cursos</h1>
-            <p className="mt-2 max-w-2xl text-base text-slate-600">Visión general de todos los cursos con rendimiento y asistencia.</p>
+            <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">
+              {isDocente ? "Mis Cursos Asignados" : "Cursos"}
+            </h1>
+            <p className="mt-2 max-w-2xl text-base text-slate-600">
+              {isDocente ? "Solo ves los cursos donde tienes áreas asignadas." : "Visión general de todos los cursos con rendimiento y asistencia."}
+            </p>
           </div>
-          {puedeGestionar ? (
+          {puedeGestionar && !isDocente ? (
             <button onClick={() => setShowForm(!showForm)} className="rounded-2xl bg-slate-950 px-6 py-3 text-sm font-bold text-white transition hover:bg-slate-800">
               {showForm ? "Cancelar" : "+ Asignar docente"}
             </button>

@@ -5,6 +5,7 @@ import DashboardPage from "../pages/dashboard/DashboardPage";
 import ProfilePage from "../pages/auth/ProfilePage";
 import CourseDetailPage from "../pages/cursos/CourseDetailPage";
 import CursosPage from "../pages/cursos/CursosPage";
+import MisAreasPage from "../pages/cursos/MisAreasPage";
 import CalificacionesPage from "../pages/calificaciones/CalificacionesPage";
 import EstadoNotasPage from "../pages/secretaria/EstadoNotasPage";
 import DocentesPage from "../pages/docentes/DocentesPage";
@@ -61,6 +62,11 @@ function AppRouter() {
           <Route path="/cursos/detalle" element={(
             <ProtectedRoute allowedRoles={["director", "secretaria", "regente", "docente"]}>
               <CourseDetailPage />
+            </ProtectedRoute>
+          )} />
+          <Route path="/mis-areas" element={(
+            <ProtectedRoute allowedRoles={["docente"]}>
+              <MisAreasPage />
             </ProtectedRoute>
           )} />
           <Route path="/perfil" element={(

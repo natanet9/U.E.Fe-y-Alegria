@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { createDocente, updateDocente, deleteDocente, restoreDocente, getDocentesPage } from "../../services/docentesService";
 import { getStoredUser } from "../../services/authService";
+import apiClient from "../../services/apiClient";
 import Toast from "../../components/Toast";
 import Modal from "../../components/Modal";
 
@@ -18,11 +19,22 @@ function DocenteCard({ docente, onUpdated, onDeleted, puedeGestionar, onToast })
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [asignaciones, setAsignaciones] = useState(null);
+  const [loadingAsig, setLoadingAsig] = useState(false);
 
   const nombre = docente.nombre_completo || [docente.nombre, docente.primer_apellido].filter(Boolean).join(" ") || "-";
   const inicial = nombre.charAt(0).toUpperCase();
   const rolClass = ROL_COLORS[docente.rol] || "bg-slate-100 text-slate-700";
   const d = docente.docente;
+
+  useEffect(() => {
+    if (!expanded || asignaciones !== null || !docente.docente?.id) return;
+    setLoadingAsig(true);
+    apiClient.get('/courses/asignaciones/', { params: { docente_id: docente.docente.id } })
+      .then(r => setAsignaciones(r.data || []))
+      .catch(() => setAsignaciones([]))
+      .finally(() => setLoadingAsig(false));
+  }, [expanded, asignaciones, docente.docente?.id]);
 
   function startEdit() {
     setForm({
@@ -124,6 +136,27 @@ function DocenteCard({ docente, onUpdated, onDeleted, puedeGestionar, onToast })
               <InfoRow label="Fecha ingreso" value={d?.fecha_ingreso_institucion} />
               <InfoRow label="Años experiencia" value={d?.anos_experiencia != null ? `${d.anos_experiencia} años` : null} />
               <InfoRow label="Estado" value={docente.activo ? "Activo" : "Inactivo"} />
+            </div>
+
+            <div className="mt-4 border-t border-slate-100 pt-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Áreas asignadas</p>
+              {loadingAsig ? (
+                <div className="text-xs text-slate-400">Cargando...</div>
+              ) : !docente.docente?.id ? (
+                <p className="text-xs text-slate-400 italic">Datos de docente no disponibles</p>
+              ) : !asignaciones?.length ? (
+                <p className="text-xs text-slate-400 italic">Sin áreas asignadas en la gestión actual</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {asignaciones.map(asig => (
+                    <a key={asig.id}
+                       href={`/cursos/detalle?docente_asignacion_id=${asig.id}`}
+                       className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100">
+                      {asig.area_nombre || asig.area || 'Área'} · {asig.grado_nombre || asig.grado || ''} {asig.paralelo_nombre || asig.paralelo || ''}
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         ) : null}

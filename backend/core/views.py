@@ -2404,12 +2404,23 @@ def report_card_download_view(request):
             resp = HttpResponse(docx_bytes, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
             resp['Content-Disposition'] = f'attachment; filename="boletin_{estudiante_id}.docx"'
             return resp
+        elif fmt == "pdf":
+            try:
+                from .services.report_card_pdf_service import ReportCardPDFService
+                pdf_bytes = ReportCardPDFService().generar_pdf(usuario, estudiante_id, gestion=gestion)
+                resp = HttpResponse(pdf_bytes, content_type='application/pdf')
+                resp['Content-Disposition'] = f'attachment; filename="boletin_{estudiante_id}.pdf"'
+                return resp
+            except (ImportError, ModuleNotFoundError):
+                return Response({"error": "Formato PDF no disponible en el servidor (reportlab no instalado)"}, status=501)
         else:
             return Response({"error": "Formato no soportado"}, status=400)
     except PermissionError as e:
         return Response({"error": str(e)}, status=403)
     except Estudiantes.DoesNotExist:
         return Response({"error": "Estudiante no encontrado"}, status=404)
+    except FileNotFoundError as e:
+        return Response({"error": str(e)}, status=500)
     except ValueError as e:
         return Response({"error": str(e)}, status=400)
 
