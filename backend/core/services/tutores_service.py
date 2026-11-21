@@ -72,6 +72,23 @@ class TutoresService:
     def _to_dict(t):
         usuario = getattr(t, 'usuario', None)
         usuario_id = getattr(t, 'usuario_id', None)
+
+        estudiantes_rel = []
+        try:
+            for et in t.estudiantetutor_set.filter(activo=True).select_related('estudiante'):
+                est = et.estudiante
+                insc = est.inscripciones_set.filter(activo=True).select_related('curso__grado', 'curso__paralelo').order_by('-gestion').first()
+                curso_str = f"{insc.curso.grado.nombre} {insc.curso.paralelo.nombre}" if (insc and insc.curso) else "Sin curso"
+                estudiantes_rel.append({
+                    'id': est.id,
+                    'nombre_completo': f"{est.nombres} {est.primer_apellido} {est.segundo_apellido or ''}".strip(),
+                    'rude': est.rude,
+                    'curso': curso_str,
+                    'es_principal': et.es_principal,
+                })
+        except Exception:
+            estudiantes_rel = []
+
         return {
             'id': getattr(t, 'id', None),
             'ci': getattr(t, 'ci', None),
@@ -79,6 +96,7 @@ class TutoresService:
             'primer_apellido': getattr(t, 'primer_apellido', '') or '',
             'segundo_apellido': getattr(t, 'segundo_apellido', '') or '',
             'nombres': getattr(t, 'nombres', '') or '',
+            'nombre_completo': f"{getattr(t, 'nombres', '')} {getattr(t, 'primer_apellido', '')} {getattr(t, 'segundo_apellido', '') or ''}".strip(),
             'parentesco': getattr(t, 'parentesco', '') or '',
             'celular': getattr(t, 'celular', '') or '',
             'email': getattr(usuario, 'email', '') or '' if usuario else '',
@@ -91,6 +109,7 @@ class TutoresService:
             'debe_cambiar_password': bool(getattr(usuario, 'debe_cambiar_password', False)) if usuario else False,
             'otp_habilitado': bool(getattr(usuario, 'otp_habilitado', False)) if usuario else False,
             'otp_metodo': getattr(usuario, 'otp_metodo', 'email') or 'email' if usuario else 'email',
+            'estudiantes': estudiantes_rel,
         }
 
     def obtener(self, usuario, tutor_id):
@@ -115,13 +134,14 @@ class TutoresService:
         """Crea la cuenta del tutor con contrasena temporal y la envia por correo."""
         email = (email or '').strip().lower()
         if not email:
-            raise ValueError('Debe registrar un correo electronico para crear la cuenta del tutor')
+            email = f"tutor.{tutor.ci}@feya.edu.bo"
 
-        if Usuarios.objects.filter(email__iexact=email).exists():
-            raise ValueError('Ya existe un usuario registrado con ese correo electronico')
-
-        if Usuarios.objects.filter(correo_personal__iexact=email).exists():
-            raise ValueError('Ese correo ya esta registrado como correo personal de otro usuario')
+        # Evitar colisión de email si ya existiera
+        base_email = email
+        idx = 1
+        while Usuarios.objects.filter(email__iexact=email).exists():
+            email = f"tutor.{tutor.ci}_{idx}@feya.edu.bo"
+            idx += 1
 
         if tutor.usuario_id:
             raise ValueError('Este tutor ya tiene una cuenta de acceso')
@@ -134,6 +154,7 @@ class TutoresService:
             primer_apellido=tutor.primer_apellido,
             segundo_apellido=tutor.segundo_apellido,
             email=email,
+            usuario=tutor.ci,
             correo_personal=email,
             password_hash=make_password(password_temporal),
             rol=self._rol_tutor(),
@@ -166,9 +187,12 @@ class TutoresService:
             },
         )
 
-        resultado = {
+        return {
             'usuario_id': cuenta.id,
-            'usuario': cuenta.usuario,
+            'usuario': cuenta.usuario or tutor.ci,
+            'ci': tutor.ci,
+            'password_temporal': password_temporal,
+            'nombre_completo': tutor.nombre_completo,
             'email': email,
             'correo_personal': cuenta.correo_personal,
             'rol': 'tutor',
@@ -176,12 +200,8 @@ class TutoresService:
             'debe_cambiar_password': True,
             'otp_habilitado': otp_habilitado,
             'otp_metodo': otp_metodo,
-            'mensaje': 'Cuenta creada. Se envio la contrasena temporal al correo del tutor.'
-            if enviado else 'Cuenta creada. No se pudo enviar el correo: comparte la contrasena temporal.',
+            'mensaje': 'Cuenta de tutor creada exitosamente. Entrega la contraseña temporal al padre de familia.',
         }
-        if not enviado:
-            resultado['password_temporal'] = password_temporal
-        return resultado
 
     def generar_credenciales(self, usuario, tutor_id, email=None, regenerar=True):
         """Crea o restablece la cuenta del tutor con una nueva contrasena temporal."""
@@ -215,9 +235,12 @@ class TutoresService:
                 usuario, accion='UPDATE', tabla='usuarios', registro_id=cuenta.id,
                 datos_nuevo={'email': cuenta.email, 'password_temporal': True, 'motivo': 'reenvio_credenciales'},
             )
-            resultado = {
+            return {
                 'usuario_id': cuenta.id,
-                'usuario': cuenta.usuario,
+                'usuario': cuenta.usuario or tutor.ci,
+                'ci': tutor.ci,
+                'password_temporal': password_temporal,
+                'nombre_completo': tutor.nombre_completo,
                 'email': cuenta.email,
                 'correo_personal': cuenta.correo_personal,
                 'rol': 'tutor',
@@ -225,12 +248,10 @@ class TutoresService:
                 'debe_cambiar_password': True,
                 'otp_habilitado': bool(getattr(cuenta, 'otp_habilitado', False)),
                 'otp_metodo': getattr(cuenta, 'otp_metodo', 'email') or 'email',
-                'mensaje': 'Credenciales regeneradas y enviadas al correo del tutor.'
-                if enviado else 'Credenciales regeneradas. No se pudo enviar el correo: comparte la contrasena temporal.',
+                'mensaje': 'Contraseña restablecida exitosamente. Entrega la contraseña temporal al padre de familia.',
             }
-            if not enviado:
-                resultado['password_temporal'] = password_temporal
-            return resultado
+
+        return self._crear_usuario_tutor(usuario, tutor, email)
 
         return self._crear_usuario_tutor(usuario, tutor, email)
 

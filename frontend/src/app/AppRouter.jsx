@@ -19,7 +19,14 @@ import EnrollmentPage from "../pages/inscripcion/EnrollmentPage";
 import ReportCardPage from "../pages/reportes/ReportCardPage";
 import UsuariosPage from "../pages/usuarios/UsuariosPage";
 import DimensionesPage from "../pages/dimensiones/DimensionesPage";
+import TutoresPage from "../pages/tutores/TutoresPage";
 import PanelAcademicoLayout from "../layouts/PanelAcademicoLayout";
+import PadresLayout from "../layouts/PadresLayout";
+import PadresLoginPage from "../pages/padres/PadresLoginPage";
+import PadresDashboardPage from "../pages/padres/PadresDashboardPage";
+import PadresCalificacionesPage from "../pages/padres/PadresCalificacionesPage";
+import PadresAsistenciaPage from "../pages/padres/PadresAsistenciaPage";
+import PadresPerfilPage from "../pages/padres/PadresPerfilPage";
 import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import ForcePasswordChangePage from "../pages/auth/ForcePasswordChangePage";
 import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
@@ -30,6 +37,7 @@ function AppRouter() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/padres/login" element={<PadresLoginPage />} />
         <Route path="/recuperar-contrasena" element={<ForgotPasswordPage />} />
         <Route path="/cambiar-password-obligatorio" element={<ForcePasswordChangePage />} />
         <Route
@@ -40,7 +48,7 @@ function AppRouter() {
           )}
         >
           <Route path="/dashboard" element={(
-            <ProtectedRoute allowedRoles={["director", "secretaria", "regente", "docente", "estudiante", "tutor"]}>
+            <ProtectedRoute allowedRoles={["director", "secretaria", "regente", "docente", "estudiante"]}>
               <DashboardPage />
             </ProtectedRoute>
           )} />
@@ -110,7 +118,7 @@ function AppRouter() {
             </ProtectedRoute>
           )} />
           <Route path="/estudiantes" element={(
-            <ProtectedRoute allowedRoles={["director", "secretaria", "regente", "docente", "tutor"]}>
+            <ProtectedRoute allowedRoles={["director", "secretaria", "regente", "docente"]}>
               <EstudiantesPage />
             </ProtectedRoute>
           )} />
@@ -120,7 +128,7 @@ function AppRouter() {
             </ProtectedRoute>
           )} />
           <Route path="/boletin" element={(
-            <ProtectedRoute allowedRoles={["director", "secretaria", "regente", "docente", "estudiante", "tutor"]}>
+            <ProtectedRoute allowedRoles={["director", "secretaria", "regente", "docente", "estudiante"]}>
               <ReportCardPage />
             </ProtectedRoute>
           )} />
@@ -134,6 +142,29 @@ function AppRouter() {
               <DimensionesPage />
             </ProtectedRoute>
           )} />
+          <Route path="/tutores" element={(
+            <ProtectedRoute allowedRoles={["director", "secretaria"]}>
+              <TutoresPage />
+            </ProtectedRoute>
+          )} />
+        </Route>
+
+        {/* Portal exclusivo para Padres de Familia (PWA Móvil) */}
+        <Route
+          element={(
+            <ProtectedRoute
+              allowedRoles={["tutor"]}
+              redirectUnauthenticatedTo="/padres/login"
+            >
+              <PadresLayout />
+            </ProtectedRoute>
+          )}
+        >
+          <Route path="/padres" element={<PadresDashboardPage />} />
+          <Route path="/padres/calificaciones" element={<PadresCalificacionesPage />} />
+          <Route path="/padres/asistencia" element={<PadresAsistenciaPage />} />
+          <Route path="/padres/perfil" element={<PadresPerfilPage />} />
+          <Route path="/padres/boletin" element={<Navigate to="/padres/calificaciones" replace />} />
         </Route>
         <Route
           path="*"

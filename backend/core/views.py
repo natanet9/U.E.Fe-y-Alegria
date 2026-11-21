@@ -58,9 +58,9 @@ def _get_usuario(request):
 
 
 def _identificador_acceso(request):
-    """Identificador enviado por el cliente: usuario, correo institucional o personal."""
+    """Identificador enviado por el cliente: usuario, correo institucional, correo personal o CI."""
     data = request.data
-    for clave in ('email', 'usuario', 'correo_personal', 'identificador'):
+    for clave in ('email', 'usuario', 'correo_personal', 'identificador', 'ci'):
         valor = data.get(clave)
         if valor:
             return str(valor).strip()

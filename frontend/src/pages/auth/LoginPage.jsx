@@ -1,7 +1,24 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import InfoPanel from "../../components/auth/InfoPanel";
 import LoginForm from "../../components/auth/LoginForm";
+import { isAuthenticated, getStoredUser } from "../../services/authService";
 
 function LoginPage() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated()) {
+      const user = getStoredUser();
+      const role = (user?.rol || user?.cargo || "").toLowerCase();
+      if (role === "tutor") {
+        navigate("/padres", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  }, [navigate]);
+
   return (
     <main className="min-h-screen w-full bg-gray-100 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-[1fr_460px] gap-6">
