@@ -4,7 +4,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Roboto Flex", "Roboto", "system-ui", "sans-serif"],
+        sans: ["Plus Jakarta Sans", "Roboto", "system-ui", "sans-serif"],
+        serif: ["Playfair Display", "Georgia", "serif"],
       },
       colors: {
         red: {

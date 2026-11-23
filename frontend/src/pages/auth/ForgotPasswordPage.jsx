@@ -111,9 +111,9 @@ function ForgotPasswordPage() {
   };
 
   const titulos = {
-    1: "Recupera tu contrasena",
+    1: "Recupera tu contraseña",
     2: "Verifica el codigo",
-    3: "Define tu nueva contrasena",
+    3: "Define tu nueva contraseña",
   };
 
   return (
@@ -156,7 +156,7 @@ function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-600 text-white rounded-xl py-3.5 text-base font-semibold hover:bg-brand-700 transition disabled:opacity-70"
+              className="mt-1 w-full inline-flex items-center justify-center gap-2 bg-[#0f2338] hover:bg-[#173350] text-white rounded-xl py-3.5 px-5 text-sm font-semibold tracking-wide cursor-pointer border-none shadow-md shadow-slate-900/15 active:scale-[0.99] transition disabled:opacity-65 disabled:cursor-not-allowed"
             >
               {loading ? "Enviando..." : "Enviar codigo"}
             </button>
@@ -176,14 +176,15 @@ function ForgotPasswordPage() {
                 required
                 value={codigo}
                 onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))}
-                className={`${inputClass} tracking-[0.5em] text-center text-xl`}
+                className={`${inputClass} tracking-[0.5em] text-center text-xl gap-2 bg-[#0f2338] hover:bg-[#173350] rounded-xl py-3.5 px-5 text-sm font-semibold tracking-wide cursor-pointer border-none shadow-md shadow-slate-900/15 active:scale-[0.99] transition disabled:opacity-65 disabled:cursor-not-allowed`}
                 placeholder="000000"
+                maxLength={6}
               />
             </div>
             <button
               type="submit"
               disabled={loading || codigo.length !== 6}
-              className="w-full bg-brand-600 text-white rounded-xl py-3.5 text-base font-semibold hover:bg-brand-700 transition disabled:opacity-70"
+              className="mt-1 w-full inline-flex items-center justify-center gap-2 bg-[#0f2338] hover:bg-[#173350] text-white rounded-xl py-3.5 px-5 text-sm font-semibold tracking-wide cursor-pointer border-none shadow-md shadow-slate-900/15 active:scale-[0.99] transition disabled:opacity-65 disabled:cursor-not-allowed"
             >
               {loading ? "Verificando..." : "Verificar codigo"}
             </button>
@@ -201,7 +202,7 @@ function ForgotPasswordPage() {
           <form className="flex flex-col gap-4" onSubmit={cambiarPassword}>
             <div className="flex flex-col gap-1.5">
               <label className="text-base font-medium text-black" htmlFor="nueva">
-                Nueva contrasena
+                Nueva contraseña
               </label>
               <input
                 id="nueva"
@@ -215,7 +216,7 @@ function ForgotPasswordPage() {
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-base font-medium text-black" htmlFor="confirmar">
-                Confirmar contrasena
+                Confirmar contraseña
               </label>
               <input
                 id="confirmar"
@@ -224,15 +225,15 @@ function ForgotPasswordPage() {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 className={inputClass}
-                placeholder="Repite la contrasena nueva"
+                placeholder="Repite la contraseña nueva"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-600 text-white rounded-xl py-3.5 text-base font-semibold hover:bg-brand-700 transition disabled:opacity-70"
+              className="mt-1 w-full inline-flex items-center justify-center gap-2 bg-[#0f2338] hover:bg-[#173350] text-white rounded-xl py-3.5 px-5 text-sm font-semibold tracking-wide cursor-pointer border-none shadow-md shadow-slate-900/15 active:scale-[0.99] transition disabled:opacity-65 disabled:cursor-not-allowed"
             >
-              {loading ? "Actualizando..." : "Cambiar contrasena"}
+              {loading ? "Actualizando..." : "Cambiar contraseña"}
             </button>
           </form>
         ) : null}
@@ -242,7 +243,7 @@ function ForgotPasswordPage() {
           onClick={() => navigate("/login")}
           className="text-sm font-medium text-black/60 hover:underline bg-transparent border-0 p-0 cursor-pointer"
         >
-          Volver al inicio de sesion
+          Volver al inicio de sesión
         </button>
       </section>
     </main>

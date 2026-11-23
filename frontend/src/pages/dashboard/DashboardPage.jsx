@@ -20,7 +20,7 @@ function formatNumber(value) {
 
 function EmptyState({ title, description }) {
   return (
-    <div className="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-5 py-6 text-sm text-slate-500">
+    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-5 py-6 text-sm text-slate-500">
       <p className="font-semibold text-slate-700">{title}</p>
       <p className="mt-1 leading-6">{description}</p>
     </div>
@@ -29,35 +29,39 @@ function EmptyState({ title, description }) {
 
 function SectionCard({ title, badge, children, accent = "slate" }) {
   const accentStyles = {
-    slate: "border-slate-200 bg-white",
-    blue: "border-blue-200 bg-blue-50/40",
-    violet: "border-violet-200 bg-violet-50/40",
-    orange: "border-orange-200 bg-orange-50/50",
-    emerald: "border-emerald-200 bg-emerald-50/40",
+    slate: "border-slate-200/90 bg-white",
+    navy: "border-slate-200/90 bg-white border-t-4 border-t-[#0f2338]",
+    amber: "border-amber-200/80 bg-white border-t-4 border-t-amber-500",
+    blue: "border-slate-200/90 bg-white border-t-4 border-t-sky-600",
+    emerald: "border-slate-200/90 bg-white border-t-4 border-t-emerald-600",
   };
 
   return (
-    <section className={`rounded-[2rem] border p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)] ${accentStyles[accent] || accentStyles.slate}`}>
+    <section className={`rounded-3xl border p-6 shadow-sm ${accentStyles[accent] || accentStyles.slate}`}>
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-xl font-black text-slate-950">{title}</h2>
-        {badge ? <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 shadow-sm">{badge}</span> : null}
+        <h2 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">{title}</h2>
+        {badge ? (
+          <span className="rounded-full bg-slate-100 border border-slate-200/80 px-3 py-1 text-xs font-semibold text-slate-600">
+            {badge}
+          </span>
+        ) : null}
       </div>
-      <div className="mt-6">{children}</div>
+      <div className="mt-5">{children}</div>
     </section>
   );
 }
 
 function StatCard({ item }) {
   const iconByTone = {
-    blue: "text-blue-600 bg-blue-50",
-    violet: "text-violet-600 bg-violet-50",
-    green: "text-emerald-600 bg-emerald-50",
-    orange: "text-orange-600 bg-orange-50",
+    navy: "text-[#0f2338] bg-slate-100 border border-slate-200",
+    amber: "text-amber-600 bg-amber-50 border border-amber-200/80",
+    emerald: "text-emerald-600 bg-emerald-50 border border-emerald-200/80",
+    sky: "text-sky-700 bg-sky-50 border border-sky-200/80",
   };
 
-  const styles = iconByTone[item.acento] || iconByTone.blue;
+  const styles = iconByTone[item.acento] || iconByTone.navy;
   const icon = {
-    blue: (
+    navy: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
         <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
         <circle cx="10" cy="7" r="4" />
@@ -65,19 +69,19 @@ function StatCard({ item }) {
         <path d="M16 11h6" />
       </svg>
     ),
-    violet: (
+    sky: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
         <path d="M4 4h16v16H4z" />
         <path d="M8 9h8M8 13h8" />
       </svg>
     ),
-    green: (
+    emerald: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
         <path d="M4 16l6-6 4 4 6-8" />
         <path d="M14 6h6v6" />
       </svg>
     ),
-    orange: (
+    amber: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
         <path d="M20 12a8 8 0 1 1-4.5-7.2" />
         <path d="M20 4v5h-5" />
@@ -86,14 +90,18 @@ function StatCard({ item }) {
   };
 
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+    <article className="group rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md hover:border-slate-300">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-sm font-semibold text-slate-600">{item.titulo}</h3>
-          <p className="mt-5 text-4xl font-black tracking-tight text-slate-950">{formatNumber(item.valor)}</p>
-          <p className="mt-2 text-sm text-slate-500">{item.detalle}</p>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">{item.titulo}</h3>
+          <p className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900">
+            {formatNumber(item.valor)}
+          </p>
+          <p className="mt-2 text-xs font-medium text-slate-500">{item.detalle}</p>
         </div>
-        <div className={`rounded-2xl p-3 ${styles}`}>{icon[item.acento] || icon.blue}</div>
+        <div className={`rounded-2xl p-3 transition-transform group-hover:scale-105 ${styles}`}>
+          {icon[item.acento] || icon.navy}
+        </div>
       </div>
     </article>
   );
@@ -103,12 +111,12 @@ function DashboardPage() {
   const [usuario] = useState(() => getStoredUser());
   const roleRaw = usuario?.cargo || usuario?.rol || "";
   const roleName = roleRaw.toLowerCase();
-  const isAdmin = roleName === "director" || roleName === "secretaria";
   const isDocente = roleName === "docente";
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [heavyLoading, setHeavyLoading] = useState(true);
   const [toast, setToast] = useState({ mensaje: "", tipo: "success" });
+
   function showToast(tipo, mensaje) {
     setToast({ mensaje, tipo });
   }
@@ -129,40 +137,38 @@ function DashboardPage() {
 
   const indicadores = useMemo(
     () => [
-      { titulo: "Total Estudiantes", valor: stats.total_estudiantes ?? 0, detalle: "Estudiantes activos", acento: "blue" },
-      { titulo: "Total Docentes", valor: stats.total_docentes ?? 0, detalle: "Docentes activos", acento: "violet" },
-      { titulo: "Total Asignaciones", valor: stats.total_asignaciones ?? 0, detalle: "Cursos con responsable", acento: "green" },
-      { titulo: "Periodos Activos", valor: stats.periodos_activos ?? 0, detalle: "Periodos en curso", acento: "orange" },
+      { titulo: "Total Estudiantes", valor: stats.total_estudiantes ?? 0, detalle: "Estudiantes activos", acento: "navy" },
+      { titulo: "Total Docentes", valor: stats.total_docentes ?? 0, detalle: "Docentes activos", acento: "sky" },
+      { titulo: "Total Asignaciones", valor: stats.total_asignaciones ?? 0, detalle: "Cursos con responsable", acento: "emerald" },
+      { titulo: "Periodos Activos", valor: stats.periodos_activos ?? 0, detalle: "Periodos en curso", acento: "amber" },
     ],
     [stats],
   );
 
   const rendimientoSegmentos = useMemo(
-    () => rendimiento.length
-      ? rendimiento
-      : [
-        { label: "Excelente", value: 0, color: "#10b981", description: "90-100 puntos" },
-        { label: "Muy Bueno", value: 0, color: "#3b82f6", description: "80-89 puntos" },
-        { label: "Bueno", value: 0, color: "#f59e0b", description: "70-79 puntos" },
-        { label: "Suficiente", value: 0, color: "#f97316", description: "61-69 puntos" },
-        { label: "Reprobado", value: 0, color: "#f59e0b", description: "Menos de 61 puntos" },
-      ],
+    () =>
+      rendimiento.length
+        ? rendimiento
+        : [
+            { label: "Excelente", value: 0, color: "#10b981", description: "90-100 puntos" },
+            { label: "Muy Bueno", value: 0, color: "#0ea5e9", description: "80-89 puntos" },
+            { label: "Bueno", value: 0, color: "#f59e0b", description: "70-79 puntos" },
+            { label: "Suficiente", value: 0, color: "#f97316", description: "61-69 puntos" },
+            { label: "Reprobado", value: 0, color: "#ef4444", description: "Menos de 61 puntos" },
+          ],
     [rendimiento],
   );
 
   const badgeByType = {
-    warning: "bg-orange-500",
-    danger: "bg-red-500",
+    warning: "bg-amber-500",
+    danger: "bg-rose-500",
     ok: "bg-emerald-500",
-    info: "bg-blue-500",
+    info: "bg-sky-500",
   };
 
   useEffect(() => {
     let mounted = true;
-
-    // First, fetch the lightweight cards payload so the user sees KPIs fast.
     setLoading(true);
-    // Use the cards-specific fast endpoint/cache
     import("../../services/dashboardService").then(({ getDashboardCards, getDashboardData }) => {
       getDashboardCards()
         .then((cardsPayload) => {
@@ -171,13 +177,11 @@ function DashboardPage() {
         })
         .catch((err) => {
           if (!mounted) return;
-          // ignore cards error; show full error below when heavy load fails
           console.debug("cards load error", err?.message || err);
         })
         .finally(() => {
           if (!mounted) return;
           setLoading(false);
-          // Start loading heavy data in background
           setHeavyLoading(true);
           getDashboardData()
             .then((full) => {
@@ -217,45 +221,66 @@ function DashboardPage() {
   }
 
   const greetingName = usuario?.nombre_completo || usuario?.nombre || "";
-  const dashboardTitle = roleName === "secretaria"
-    ? "Panel de Secretaría"
-    : roleName === "director"
-      ? "Dashboard del Director"
-      : "Panel Académico";
-  const dashboardDescription = roleName === "secretaria"
-    ? "Monitoreo de asignaciones, cierres y estado general de calificaciones."
-    : roleName === "docente"
-      ? "Tus asignaciones, progreso de notas y estado de cierre en un solo vistazo."
-      : "Resumen ejecutivo de la actividad académica. Alertas, rendimiento y asistencia en un solo vistazo.";
+  const dashboardTitle =
+    roleName === "secretaria"
+      ? "Panel de Secretaría"
+      : roleName === "director"
+        ? "Dashboard del Director"
+        : "Panel Académico";
+  const dashboardDescription =
+    roleName === "secretaria"
+      ? "Monitoreo de asignaciones, cierres y estado general de calificaciones."
+      : roleName === "docente"
+        ? "Tus asignaciones, progreso de notas y estado de cierre en un solo vistazo."
+        : "Resumen ejecutivo de la actividad académica. Alertas, rendimiento y asistencia en un solo vistazo.";
   const periodoActivo = dashboard?.periodo_activo;
 
   return (
-    <section className="space-y-6">
-      <header className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,rgba(15,23,42,0.06),rgba(255,255,255,0.97),rgba(37,99,235,0.05))] p-8 shadow-[0_18px_70px_rgba(15,23,42,0.05)]">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <section className="space-y-6 pb-8">
+      {/* Banner Hero en azul marino institucional con acentos ámbar */}
+      <header className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#091726] via-[#0f2338] to-[#1a3450] p-7 sm:p-9 text-white shadow-lg">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-amber-500/15 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-sky-400/10 blur-3xl"
+        />
+
+        <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">Fe y Alegria</p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950">
+            <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/15 border border-amber-400/30 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-amber-300">
+              <span>✦</span>
+              <span>U.E. Divino Corazón de Jesús</span>
+            </div>
+
+            <h1 className="mt-3 font-serif text-3xl sm:text-4xl font-bold tracking-tight text-white">
               {greetingName ? `Bienvenido, ${greetingName}` : dashboardTitle}
             </h1>
-            <p className="mt-2 max-w-3xl text-base text-slate-600">
+            <p className="mt-2 max-w-2xl text-sm sm:text-base text-slate-300 leading-relaxed">
               {dashboardDescription}
             </p>
           </div>
-          <div className="flex flex-wrap gap-3 text-sm text-slate-500">
-            <span className="rounded-full border border-slate-200 bg-white px-4 py-2">
+
+          <div className="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm">
+            <span className="rounded-full bg-white/10 backdrop-blur-md border border-white/15 px-4 py-2 font-medium text-white">
               {periodoActivo ? `${periodoActivo.nombre} ${periodoActivo.gestion}` : "Periodo no definido"}
             </span>
-            <span className="rounded-full border border-slate-200 bg-white px-4 py-2">{licenciasPendientes} licencias pendientes</span>
+            <span className="rounded-full bg-amber-500/20 border border-amber-400/30 px-4 py-2 font-semibold text-amber-300">
+              {licenciasPendientes} licencias pendientes
+            </span>
             <button
               aria-label="refresh-dashboard"
               onClick={refreshDashboard}
-              className="ml-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-50"
+              className="rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold px-4 py-2 transition shadow-sm cursor-pointer"
             >
               Refrescar
             </button>
             {lastUpdated ? (
-              <span className="rounded-full border border-slate-200 bg-white px-4 py-2">Última: {new Date(lastUpdated).toLocaleTimeString('es-PA')}</span>
+              <span className="rounded-full bg-white/10 border border-white/15 px-3.5 py-2 text-xs text-slate-300">
+                Última: {new Date(lastUpdated).toLocaleTimeString("es-PA")}
+              </span>
             ) : null}
           </div>
         </div>
@@ -263,20 +288,23 @@ function DashboardPage() {
 
       <Toast mensaje={toast.mensaje} tipo={toast.tipo} onClose={() => setToast({ mensaje: "", tipo: "success" })} />
 
-      {!isDocente && (loading ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="h-36 animate-pulse rounded-3xl border border-slate-200 bg-white" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {indicadores.map((item) => (
-            <StatCard key={item.titulo} item={item} />
-          ))}
-        </div>
-      ))}
+      {/* Tarjetas KPI */}
+      {!isDocente &&
+        (loading ? (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="h-36 animate-pulse rounded-3xl border border-slate-200 bg-white" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {indicadores.map((item) => (
+              <StatCard key={item.titulo} item={item} />
+            ))}
+          </div>
+        ))}
 
+      {/* Accesos Rápidos */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[
           ...(roleName === "director" ? [{ to: "/periodos", title: "Periodos", detail: "Abrir, habilitar y enviar" }] : []),
@@ -284,19 +312,26 @@ function DashboardPage() {
           ...(isDocente ? [] : [{ to: "/licencias", title: "Licencias", detail: "Revisar solicitudes" }]),
           { to: "/reportes", title: "Reportes", detail: "Exportar documentos" },
         ].map((item) => (
-          <Link key={item.to} to={item.to} className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:border-slate-300">
-            <p className="text-sm font-semibold text-slate-500">Acceso rápido</p>
-            <h3 className="mt-2 text-lg font-black text-slate-950">{item.title}</h3>
-            <p className="mt-1 text-sm text-slate-600">{item.detail}</p>
+          <Link
+            key={item.to}
+            to={item.to}
+            className="group rounded-3xl border border-slate-200/90 bg-white p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#0f2338]/30 hover:shadow-md"
+          >
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-amber-600">Acceso rápido</p>
+              <span className="text-slate-400 group-hover:text-[#0f2338] group-hover:translate-x-0.5 transition">→</span>
+            </div>
+            <h3 className="mt-2 text-lg font-bold text-slate-900">{item.title}</h3>
+            <p className="mt-1 text-sm text-slate-500">{item.detail}</p>
           </Link>
         ))}
       </section>
 
       {isDocente && asignaciones.length > 0 && (
-        <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.05)]">
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-xl font-black text-slate-950">Mis Asignaciones</h2>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+            <h2 className="text-xl font-bold text-slate-900">Mis Asignaciones</h2>
+            <span className="rounded-full bg-slate-100 border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">
               {periodoActivo ? `${periodoActivo.nombre} ${periodoActivo.gestion}` : "Sin periodo activo"}
             </span>
           </div>
@@ -307,13 +342,13 @@ function DashboardPage() {
                 : asig.completitud >= 100
                   ? "bg-emerald-500"
                   : asig.completitud >= 50
-                    ? "bg-blue-500"
+                    ? "bg-[#0f2338]"
                     : "bg-amber-500";
               return (
                 <Link
                   key={asig.id}
                   to={`/cursos/detalle?docente_asignacion_id=${asig.id}${periodoActivo?.id ? `&periodo_id=${periodoActivo.id}` : ""}`}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
+                  className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
@@ -337,7 +372,7 @@ function DashboardPage() {
                         style={{ width: `${Math.min(asig.completitud, 100)}%` }}
                       />
                     </div>
-                    <p className="mt-1 text-right text-xs font-semibold text-slate-500">{asig.completitud}%</p>
+                    <p className="mt-1 text-right text-xs font-semibold text-slate-600">{asig.completitud}%</p>
                   </div>
                 </Link>
               );
@@ -350,12 +385,14 @@ function DashboardPage() {
         <div className="grid gap-6 xl:grid-cols-2">
           <SectionCard title="Configuración del Sistema" badge={`${configChecklist.completados}/${configChecklist.total}`} accent="emerald">
             {configChecklist.items.length ? (
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {configChecklist.items.map((item) => (
-                  <div key={item.key} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm">
-                    <div className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                      item.completado ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-400"
-                    }`}>
+                  <div key={item.key} className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-3">
+                    <div
+                      className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                        item.completado ? "bg-emerald-100 text-emerald-700" : "bg-slate-200/70 text-slate-500"
+                      }`}
+                    >
                       {item.completado ? "✓" : "·"}
                     </div>
                     <span className={`text-sm ${item.completado ? "text-slate-600" : "font-semibold text-slate-900"}`}>
@@ -369,14 +406,14 @@ function DashboardPage() {
             )}
           </SectionCard>
 
-          <SectionCard title="Alertas" badge="Acción recomendada" accent="orange">
+          <SectionCard title="Alertas" badge="Acción recomendada" accent="amber">
             <div className="space-y-3">
               {alertasCriticas.length ? (
                 alertasCriticas.map((item, index) => (
-                  <article key={`${item.tipo || item.mensaje}-${index}`} className="flex items-start gap-3 rounded-2xl bg-white px-4 py-4 shadow-sm">
-                    <div className={`mt-1 h-3 w-3 rounded-full ${badgeByType[item.tipo] || badgeByType.info}`} />
+                  <article key={`${item.tipo || item.mensaje}-${index}`} className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-4">
+                    <div className={`mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full ${badgeByType[item.tipo] || badgeByType.info}`} />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-slate-950">{item.titulo || "Alerta"}</p>
+                      <p className="text-sm font-bold text-slate-900">{item.titulo || "Alerta"}</p>
                       <p className="mt-1 text-sm text-slate-600">{item.mensaje || item.detalle || item.descripcion}</p>
                     </div>
                   </article>
@@ -387,20 +424,20 @@ function DashboardPage() {
             </div>
           </SectionCard>
 
-          <SectionCard title="Promedio por Asignatura" badge="Rendimiento académico" accent="violet">
+          <SectionCard title="Promedio por Asignatura" badge="Rendimiento académico" accent="navy">
             {promedioPorAsignatura.labels.length ? (
-              <div className="h-80 rounded-3xl border border-slate-100 bg-white p-4">
-                <BarChartMock data={promedioPorAsignatura.data} labels={promedioPorAsignatura.labels} color="#8b5cf6" />
+              <div className="h-80 rounded-2xl border border-slate-100 bg-slate-50/40 p-4">
+                <BarChartMock data={promedioPorAsignatura.data} labels={promedioPorAsignatura.labels} color="#0f2338" />
               </div>
             ) : (
               <EmptyState title="Sin datos suficientes" description="Cuando existan notas registradas, aquí se mostrará el rendimiento por materia." />
             )}
           </SectionCard>
 
-          <SectionCard title="Rendimiento por Curso" badge="Promedio por paralelo" accent="orange">
+          <SectionCard title="Rendimiento por Curso" badge="Promedio por paralelo" accent="amber">
             {promedioPorCurso.labels.length ? (
-              <div className="h-80 rounded-3xl border border-slate-100 bg-white p-4">
-                <BarChartMock data={promedioPorCurso.data} labels={promedioPorCurso.labels} color="#f97316" />
+              <div className="h-80 rounded-2xl border border-slate-100 bg-slate-50/40 p-4">
+                <BarChartMock data={promedioPorCurso.data} labels={promedioPorCurso.labels} color="#f59e0b" />
               </div>
             ) : (
               <EmptyState title="Sin datos suficientes" description="Cuando existan notas registradas, aquí se mostrará el rendimiento por curso." />
@@ -413,8 +450,8 @@ function DashboardPage() {
         <div className="grid gap-6 xl:grid-cols-2">
           <SectionCard title="Asistencia por Curso" badge="Últimos 7 días" accent="blue">
             {asistenciaPorCurso.labels.length ? (
-              <div className="h-80 rounded-3xl border border-slate-100 bg-white p-4">
-                <BarChartMock data={asistenciaPorCurso.data} labels={asistenciaPorCurso.labels} color="#3b82f6" />
+              <div className="h-80 rounded-2xl border border-slate-100 bg-slate-50/40 p-4">
+                <BarChartMock data={asistenciaPorCurso.data} labels={asistenciaPorCurso.labels} color="#0284c7" />
               </div>
             ) : (
               <EmptyState title="Sin datos de asistencia" description="No hay registros de asistencia para los últimos 7 días." />
@@ -437,13 +474,13 @@ function DashboardPage() {
             {estudiantesDestacados.length ? (
               <div className="space-y-3">
                 {estudiantesDestacados.map((item) => (
-                  <article key={item.nombre} className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3 shadow-sm">
+                  <article key={item.nombre} className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-3">
                     <div>
-                      <p className="text-sm font-bold text-slate-950">{item.nombre}</p>
+                      <p className="text-sm font-bold text-slate-900">{item.nombre}</p>
                       <p className="text-xs text-slate-500">{item.mensaje}</p>
                     </div>
-                    <div className="rounded-xl bg-blue-50 px-3 py-1 text-right">
-                      <p className="text-lg font-black text-blue-700">{item.promedio}</p>
+                    <div className="rounded-xl bg-[#0f2338] px-3 py-1 text-right">
+                      <p className="text-base font-bold text-amber-400">{item.promedio}</p>
                     </div>
                   </article>
                 ))}
@@ -453,17 +490,17 @@ function DashboardPage() {
             )}
           </SectionCard>
 
-          <SectionCard title="Estudiantes en Riesgo" badge="Menor rendimiento" accent="orange">
+          <SectionCard title="Estudiantes en Riesgo" badge="Menor rendimiento" accent="amber">
             {estudiantesRiesgo.length ? (
               <div className="space-y-3">
                 {estudiantesRiesgo.map((item) => (
-                  <article key={item.nombre} className="flex items-center justify-between rounded-2xl border border-orange-100 bg-white px-4 py-3 shadow-sm">
+                  <article key={item.nombre} className="flex items-center justify-between rounded-2xl border border-amber-100 bg-amber-50/40 px-4 py-3">
                     <div>
-                      <p className="text-sm font-bold text-slate-950">{item.nombre}</p>
+                      <p className="text-sm font-bold text-slate-900">{item.nombre}</p>
                       <p className="text-xs text-slate-500">{item.mensaje}</p>
                     </div>
-                    <div className="rounded-xl bg-red-50 px-3 py-1 text-right">
-                      <p className="text-lg font-black text-red-600">{item.promedio}</p>
+                    <div className="rounded-xl bg-amber-100 px-3 py-1 text-right">
+                      <p className="text-base font-bold text-amber-800">{item.promedio}</p>
                     </div>
                   </article>
                 ))}
@@ -477,26 +514,26 @@ function DashboardPage() {
 
       {!isDocente && (
         <div className="grid gap-6 xl:grid-cols-2">
-          <SectionCard title="Docentes sin Cierre" badge="Pendientes" accent="orange">
-          {docentesSinCierre.length ? (
-            <div className="space-y-3">
-              {docentesSinCierre.map((item) => (
-                <article key={item.id || item.docente} className="flex items-center justify-between rounded-2xl border border-orange-100 bg-white px-4 py-3 shadow-sm">
-                  <div>
-                    <p className="text-sm font-bold text-slate-950">{item.docente}</p>
-                    <p className="text-xs text-slate-500">{item.area}</p>
-                  </div>
-                  <div className="rounded-xl bg-orange-50 px-3 py-1 text-right">
-                    <p className="text-xs font-semibold text-orange-600">Sin cerrar</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <EmptyState title="Todos los docentes cerraron" description="No hay docentes pendientes de cierre en el periodo activo." />
-          )}
-        </SectionCard>
-      </div>
+          <SectionCard title="Docentes sin Cierre" badge="Pendientes" accent="amber">
+            {docentesSinCierre.length ? (
+              <div className="space-y-3">
+                {docentesSinCierre.map((item) => (
+                  <article key={item.id || item.docente} className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/70 px-4 py-3">
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">{item.docente}</p>
+                      <p className="text-xs text-slate-500">{item.area}</p>
+                    </div>
+                    <div className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-1 text-right">
+                      <p className="text-xs font-semibold text-amber-700">Sin cerrar</p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <EmptyState title="Todos los docentes cerraron" description="No hay docentes pendientes de cierre en el periodo activo." />
+            )}
+          </SectionCard>
+        </div>
       )}
     </section>
   );
