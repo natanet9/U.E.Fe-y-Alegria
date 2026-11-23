@@ -47,7 +47,8 @@ function ForcePasswordChangePage() {
     try {
       await changePasswordRequest(current, newPass);
       setSuccess("Contrasena actualizada. Redirigiendo...");
-      setTimeout(() => navigate("/dashboard", { replace: true }), 900);
+      const role = (usuario?.rol || usuario?.cargo || "").toLowerCase();
+      setTimeout(() => navigate(role === "tutor" ? "/padres" : "/dashboard", { replace: true }), 900);
     } catch (err) {
       setError(err?.response?.data?.error || "No se pudo cambiar la contrasena");
     } finally {

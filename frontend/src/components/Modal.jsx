@@ -7,7 +7,21 @@ const ICONS = {
   success: { emoji: "✅", bg: "bg-emerald-100 text-emerald-600" },
 };
 
-export default function Modal({ isOpen, mode = "confirm", iconType = "info", title, message, inputPlaceholder, inputValue: initialInput, onConfirm, onCancel, confirmLabel = "Aceptar", cancelLabel = "Cancelar" }) {
+export default function Modal({
+  isOpen,
+  mode = "confirm",
+  iconType = "info",
+  title,
+  message,
+  inputPlaceholder,
+  inputValue: initialInput,
+  onConfirm,
+  onCancel,
+  onClose,
+  confirmLabel = "Aceptar",
+  cancelLabel = "Cancelar",
+  children,
+}) {
   const [input, setInput] = useState(initialInput || "");
 
   useEffect(() => {
@@ -15,6 +29,8 @@ export default function Modal({ isOpen, mode = "confirm", iconType = "info", tit
   }, [isOpen, initialInput]);
 
   const icon = ICONS[iconType] || ICONS.info;
+  const handleCancel = onCancel || onClose || (() => {});
+  const handleConfirm = onConfirm || handleCancel;
 
   if (!isOpen) return null;
 
@@ -26,8 +42,10 @@ export default function Modal({ isOpen, mode = "confirm", iconType = "info", tit
             {icon.emoji}
           </div>
           {title && <h3 className="mt-4 text-lg font-bold text-slate-950">{title}</h3>}
-          <p className="mt-2 text-sm text-slate-600">{message}</p>
+          {message && <p className="mt-2 text-sm text-slate-600">{message}</p>}
         </div>
+
+        {children}
 
         {mode === "prompt" && (
           <input
@@ -41,10 +59,10 @@ export default function Modal({ isOpen, mode = "confirm", iconType = "info", tit
         )}
 
         <div className="mt-6 flex gap-3">
-          <button type="button" onClick={onCancel} className="flex-1 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+          <button type="button" onClick={handleCancel} className="flex-1 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
             {cancelLabel}
           </button>
-          <button type="button" onClick={() => onConfirm(mode === "prompt" ? input : undefined)} className="flex-1 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+          <button type="button" onClick={() => handleConfirm(mode === "prompt" ? input : undefined)} className="flex-1 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
             {confirmLabel}
           </button>
         </div>

@@ -12,6 +12,9 @@ export default function TutoresPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
 
+  // Modal de confirmación previa
+  const [tutorAConfirmar, setTutorAConfirmar] = useState(null);
+
   // Modal de credenciales generadas/restablecidas
   const [credencialModalOpen, setCredencialModalOpen] = useState(false);
   const [credencialData, setCredencialData] = useState(null);
@@ -220,7 +223,7 @@ export default function TutoresPage() {
                     </td>
                     <td className="px-5 py-4 text-right">
                       <button
-                        onClick={() => handleRestablecerContrasena(t)}
+                        onClick={() => setTutorAConfirmar(t)}
                         disabled={procesandoId === t.id}
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-2xs ${
                           t.tiene_usuario
@@ -275,67 +278,119 @@ export default function TutoresPage() {
         )}
       </div>
 
+      {/* Modal de Confirmación Previo */}
+      <Modal
+        isOpen={Boolean(tutorAConfirmar)}
+        mode="confirm"
+        iconType="warning"
+        title={tutorAConfirmar?.tiene_usuario ? "Restablecer Contraseña" : "Crear Cuenta de Tutor"}
+        message={
+          tutorAConfirmar
+            ? `¿Está seguro de ${
+                tutorAConfirmar.tiene_usuario
+                  ? "restablecer la contraseña"
+                  : "crear la cuenta de acceso"
+              } para ${
+                tutorAConfirmar.nombre_completo ||
+                `${tutorAConfirmar.nombres} ${tutorAConfirmar.primer_apellido}`
+              } (CI: ${tutorAConfirmar.ci})? Se generará una contraseña temporal para entrega presencial.`
+            : ""
+        }
+        confirmLabel={tutorAConfirmar?.tiene_usuario ? "Sí, Restablecer" : "Sí, Crear Cuenta"}
+        cancelLabel="Cancelar"
+        onConfirm={async () => {
+          const tutor = tutorAConfirmar;
+          setTutorAConfirmar(null);
+          if (tutor) {
+            await handleRestablecerContrasena(tutor);
+          }
+        }}
+        onCancel={() => setTutorAConfirmar(null)}
+      />
+
       {/* Modal de Entrega de Credenciales Temporales */}
       {credencialModalOpen && credencialData && (
-        <Modal
-          isOpen={credencialModalOpen}
-          onClose={() => setCredencialModalOpen(false)}
-          title="Credenciales de Acceso para el Tutor"
-        >
-          <div className="space-y-4 text-slate-800">
-            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-start gap-3">
-              <span className="text-xl">📋</span>
-              <div>
-                <p className="font-bold text-amber-950">
-                  {credencialData.es_nuevo
-                    ? "¡Cuenta de tutor creada con éxito!"
-                    : "Contraseña temporal restablecida"}
-                </p>
-                <p className="mt-1 leading-relaxed">
-                  Por políticas de seguridad, el tutor debe ingresar presencialmente con estas credenciales a la PWA móvil. Al iniciar sesión por primera vez, el sistema le solicitará cambiar la contraseña.
-                </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-100">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl font-bold">
+                🔑
               </div>
+              <div className="flex-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full">
+                  {credencialData.es_nuevo ? "Nueva Cuenta Creada" : "Contraseña Restablecida"}
+                </span>
+                <h3 className="text-lg font-black text-slate-900 mt-1">
+                  Credenciales de Acceso para el Tutor
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCredencialModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold text-sm transition"
+              >
+                ✕
+              </button>
             </div>
 
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3 font-mono text-xs">
-              <div className="flex justify-between items-center py-1 border-b border-slate-200">
-                <span className="text-slate-500 font-sans">Tutor(a):</span>
-                <span className="font-bold text-slate-900 font-sans">{credencialData.nombre}</span>
+            <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+              <p className="text-xs text-slate-600">
+                Entregue estas credenciales en persona al padre/madre de familia para su ingreso al portal móvil:
+              </p>
+              <div className="bg-white rounded-xl p-3 border border-slate-200 text-sm space-y-2">
+                <div className="flex justify-between items-center text-xs text-slate-500">
+                  <span>Tutor(a):</span>
+                  <span className="font-semibold text-slate-900 text-sm">{credencialData.nombre}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-slate-500">
+                  <span>Usuario / C.I.:</span>
+                  <span className="font-mono font-bold text-slate-900 text-base">{credencialData.ci}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-slate-500">
+                  <span>Contraseña Temporal:</span>
+                  <span className="font-mono font-bold text-emerald-700 text-base bg-emerald-50 px-2.5 py-0.5 rounded">
+                    {credencialData.password_temporal}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-slate-500">
+                  <span>Portal Web Móvil:</span>
+                  <span className="text-blue-600 font-medium">/padres/login</span>
+                </div>
               </div>
-              <div className="flex justify-between items-center py-1 border-b border-slate-200">
-                <span className="text-slate-500 font-sans">Usuario / Carnet (CI):</span>
-                <span className="font-bold text-red-700 text-sm">{credencialData.ci}</span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span className="text-slate-500 font-sans">Contraseña Temporal:</span>
-                <span className="font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-lg text-sm tracking-wider">
-                  {credencialData.password_temporal}
+
+              <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800 flex items-start gap-2">
+                <span className="text-base">⚠️</span>
+                <span>
+                  Por políticas de seguridad, no se envían correos de recuperación. Al iniciar sesión por primera vez con su C.I. y esta contraseña, el sistema le solicitará definir una contraseña personal.
                 </span>
               </div>
             </div>
 
-            <div className="p-3 bg-slate-100 rounded-xl text-[11px] text-slate-500 text-center">
-              Enlace del Portal Móvil: <strong className="text-slate-700">http://localhost:3000/padres/login</strong>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="mt-5 flex gap-2 justify-end">
               <button
                 type="button"
                 onClick={handleCopiarCredenciales}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-sm"
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 transition"
               >
-                <span>{copiado ? "✓ ¡Copiado!" : "📋 Copiar Ficha"}</span>
+                {copiado ? "✓ ¡Copiado!" : "📋 Copiar Ficha"}
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 transition"
+              >
+                🖨️ Imprimir
               </button>
               <button
                 type="button"
                 onClick={() => setCredencialModalOpen(false)}
-                className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition"
+                className="rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-bold text-white hover:bg-slate-800 transition"
               >
                 Cerrar
               </button>
             </div>
           </div>
-        </Modal>
+        </div>
       )}
     </div>
   );

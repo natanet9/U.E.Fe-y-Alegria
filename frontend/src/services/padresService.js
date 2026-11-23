@@ -44,3 +44,20 @@ export async function descargarBoletinArchivo(estudianteId, gestion = "", fmt = 
   });
   return response;
 }
+
+/**
+ * Asistente Académico para Padres — llama al backend seguro con Tool Calling.
+ * El backend obtiene el usuario/tutor desde la sesión (cookie auth_token).
+ * El cliente NUNCA envía IDs de estudiantes.
+ *
+ * @param {string} pregunta   - Pregunta del tutor
+ * @param {Array}  historial  - [{sender: "user"|"bot", text: string}]
+ * @returns {Promise<{respuesta: string, fuente: string, modelo?: string}>}
+ */
+export async function consultarAsistente(pregunta, historial = []) {
+  const response = await apiClient.post("/padres/asistente/", {
+    pregunta,
+    historial: (historial || []).slice(-8), // últimos 8 mensajes para contexto
+  });
+  return response.data;
+}

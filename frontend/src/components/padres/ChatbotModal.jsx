@@ -145,7 +145,7 @@ export default function ChatbotModal() {
                 {usaGroq ? (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-400 text-slate-950 flex items-center gap-1 shadow-2xs">
                     <span>🚀</span>
-                    <span>Groq (Llama 3.3)</span>
+                    <span>Groq (Tool Calling)</span>
                   </span>
                 ) : (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400 text-slate-950 flex items-center gap-1 shadow-2xs">
@@ -215,10 +215,10 @@ export default function ChatbotModal() {
                 <div className="whitespace-pre-wrap">{m.text}</div>
 
                 {/* Badge de fuente si es Groq */}
-                {m.fuente === "groq" && (
+                {(m.fuente === "groq" || m.fuente === "groq_tool" || m.fuente === "groq_directo") && (
                   <div className="mt-2 text-[9px] text-slate-400 flex items-center gap-1 border-t border-slate-100 pt-1">
                     <span>🚀</span>
-                    <span>Respuesta generada por Groq ({m.modelo || "LLaMA 3.3"})</span>
+                    <span>Respuesta generada por Groq {m.fuente === "groq_tool" ? "(Tool Calling)" : ""}</span>
                   </div>
                 )}
 

@@ -156,8 +156,14 @@ export default function PadresLoginPage() {
       setCargando(false);
 
       // Verificación estricta de rol: Solo tutores
-      const usuarioObj = data?.usuario || data;
-      const rol = (usuarioObj?.rol || usuarioObj?.cargo || "").toLowerCase();
+      // loginRequest devuelve el objeto de usuario directamente. En el modelo, 'usuario' es el username (string "7000020").
+      const usuarioObj = (data && typeof data === "object" && typeof data.usuario === "object" && data.usuario !== null)
+        ? data.usuario
+        : data;
+      const rawRol = (typeof usuarioObj?.rol === "object" && usuarioObj?.rol !== null)
+        ? usuarioObj.rol.nombre
+        : (usuarioObj?.rol || usuarioObj?.cargo || "");
+      const rol = String(rawRol || "").toLowerCase();
       if (rol !== "tutor") {
         await logoutRequest();
         agregarMensaje(
@@ -331,8 +337,13 @@ export default function PadresLoginPage() {
 
     try {
       const data = await loginRequest(formEmail, formPass);
-      const usuarioObj = data?.usuario || data;
-      const rol = (usuarioObj?.rol || usuarioObj?.cargo || "").toLowerCase();
+      const usuarioObj = (data && typeof data === "object" && typeof data.usuario === "object" && data.usuario !== null)
+        ? data.usuario
+        : data;
+      const rawRol = (typeof usuarioObj?.rol === "object" && usuarioObj?.rol !== null)
+        ? usuarioObj.rol.nombre
+        : (usuarioObj?.rol || usuarioObj?.cargo || "");
+      const rol = String(rawRol || "").toLowerCase();
 
       if (rol !== "tutor") {
         await logoutRequest();

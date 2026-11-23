@@ -2586,3 +2586,46 @@ def catalog_delete_view(request, modelo, item_id):
 
 
 
+
+
+@api_view(["POST"])
+@trace_view_function
+def padres_asistente_view(request):
+    """
+    POST /api/padres/asistente/
+    Asistente Académico para Padres — Tool Calling con Groq (backend seguro).
+
+    Body JSON:
+        { "pregunta": "...", "historial": [{sender, text}, ...] }
+
+    Seguridad:
+        - Solo accesible por usuarios con rol 'tutor'.
+        - El usuario se obtiene exclusivamente de la sesión (request.usuario).
+        - Nunca se acepta el ID del estudiante desde el cliente.
+    """
+    usuario = _get_usuario(request)
+    if not usuario:
+        return Response({"error": "No autorizado"}, status=401)
+
+    # Solo tutores pueden usar el asistente académico para padres
+    ac = AccessControlService()
+    if not ac.es_tutor(usuario):
+        return Response(
+            {"error": "Esta función es exclusiva para tutores/padres de familia."},
+            status=403,
+        )
+
+    pregunta = (request.data.get("pregunta") or "").strip()
+    if not pregunta:
+        return Response({"error": "Debe enviar una pregunta."}, status=400)
+
+    historial = request.data.get("historial") or []
+
+    from .services.asistente_padres_service import AsistentePadresService
+    servicio = AsistentePadresService(usuario)
+
+    try:
+        resultado = servicio.responder(pregunta, historial)
+        return Response(resultado, status=200)
+    except Exception as e:
+        return Response({"error": f"Error interno del asistente: {str(e)}"}, status=500)
