@@ -262,18 +262,27 @@ def logout_view(request):
 
     if token:
         usuario = _get_usuario(request)
+        if not usuario:
+            from .auth_utils import decode_token
+            user_id, _ = decode_token(token)
+            if user_id:
+                usuario = Usuarios.objects.filter(id=user_id).first()
         if usuario:
             from django.utils import timezone as tz
             from datetime import timedelta
-            TokenBlacklist.objects.create(
+            TokenBlacklist.objects.get_or_create(
                 token=token,
-                usuario=usuario,
-                expira_en=tz.now() + timedelta(hours=24),
+                defaults={
+                    "usuario": usuario,
+                    "expira_en": tz.now() + timedelta(hours=24),
+                },
             )
 
     response = Response({"mensaje": "Sesion cerrada"}, status=200)
     response.delete_cookie(
         getattr(settings, "AUTH_COOKIE_NAME", "auth_token"),
+        path="/",
+        samesite=getattr(settings, "AUTH_COOKIE_SAMESITE", "Lax"),
     )
     return response
 

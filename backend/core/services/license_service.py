@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.utils import timezone
 
 from ..models import Licencias, Inscripciones, DocenteAsignacion, Docentes
@@ -11,13 +13,23 @@ from .pagination import paginar_desde_queryset
 
 @trace_service_class
 class LicenseService:
+    RETENCION_DIAS = 30
 
     def __init__(self):
         self.ac = AccessControlService()
         self.audit = AuditService()
         self.notif = NotificationService()
 
+    @classmethod
+    def limpiar_expiradas(cls, dias=None):
+        """Elimina de la base de datos las licencias con mas de 30 dias desde su creacion."""
+        retencion = cls.RETENCION_DIAS if dias is None else dias
+        limite = timezone.now() - timedelta(days=retencion)
+        eliminadas, _ = Licencias.objects.filter(created_at__lt=limite).delete()
+        return eliminadas
+
     def listar(self, usuario, estado=None, page=1, page_size=20):
+        self.limpiar_expiradas()
         qs = Licencias.objects.select_related(
             'estudiante', 'tutor_solicitante', 'regente', 'aprobado_por'
         ).filter(activo=True).order_by('-created_at')
@@ -39,6 +51,10 @@ class LicenseService:
                     gestion__in=cursos_qs.values('gestion'),
                 ).values_list('estudiante_id', flat=True).distinct()
                 qs = qs.filter(estudiante_id__in=estudiante_ids)
+            elif self.ac.es_tutor(usuario):
+                # El tutor solo ve licencias de sus propios hijos
+                ids_hijos = self.ac.get_estudiantes_ids_tutor(usuario)
+                qs = qs.filter(estudiante_id__in=ids_hijos)
             else:
                 raise PermissionError('No tienes permisos para ver licencias')
 
@@ -69,8 +85,11 @@ class LicenseService:
         return result
 
     def crear(self, usuario, data):
-        if not self.ac.puede_gestionar_licencias(usuario):
+        # Permitir a regentes, secretarias, directores y tutores crear licencias.
+        if not (self.ac.puede_gestionar_licencias(usuario) or self.ac.es_tutor(usuario) or self.ac.es_director(usuario)):
             raise PermissionError('No tienes permisos para gestionar licencias')
+
+        self.limpiar_expiradas()
 
         validar_required(data, ['estudiante_id', 'motivo', 'fecha_inicio', 'fecha_fin'])
         validar_fecha(data.get('fecha_inicio'), 'fecha_inicio')
@@ -86,9 +105,20 @@ class LicenseService:
         fecha_inicio = data.get('fecha_inicio')
         fecha_fin = data.get('fecha_fin')
 
+        # Si el usuario es tutor y no envió tutor_id, auto-asignarlo desde su registro
+        tutor_solicitante_id = data.get('tutor_id')
+        if not tutor_solicitante_id and self.ac.es_tutor(usuario):
+            tutor_obj = self.ac.get_tutor(usuario)
+            if tutor_obj:
+                tutor_solicitante_id = tutor_obj.id
+            # Validar que el estudiante pertenece al tutor
+            ids_autorizados = self.ac.get_estudiantes_ids_tutor(usuario)
+            if int(estudiante_id) not in ids_autorizados:
+                raise PermissionError('No puedes solicitar licencia para un estudiante que no es tu hijo')
+
         licencia = Licencias.objects.create(
             estudiante_id=estudiante_id,
-            tutor_solicitante_id=data.get('tutor_id'),
+            tutor_solicitante_id=tutor_solicitante_id,
             regente=usuario if self.ac.es_regente(usuario) else None,
             motivo=motivo,
             fecha_inicio=fecha_inicio,
@@ -106,6 +136,8 @@ class LicenseService:
     def obtener(self, usuario, licencia_id):
         if not self.ac.puede_ver_todo(usuario):
             raise PermissionError('No tienes permisos para ver licencias')
+
+        self.limpiar_expiradas()
 
         licencia = Licencias.objects.select_related('estudiante', 'tutor_solicitante', 'regente', 'aprobado_por').get(id=licencia_id, activo=True)
         return {

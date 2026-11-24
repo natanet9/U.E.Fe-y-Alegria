@@ -75,6 +75,7 @@ class AuthMiddleware:
         "/api/health/",
         "/api/auth/login/",
         "/api/login/",
+        "/api/auth/logout/",
         "/api/auth/forgot-password/",
         "/api/auth/reset-password/",
         "/api/auth/verify-otp/",

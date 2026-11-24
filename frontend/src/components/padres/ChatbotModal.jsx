@@ -41,20 +41,20 @@ export default function ChatbotModal() {
           sender: "bot",
           text:
             estudiantes && estudiantes.length > 1
-              ? `Tengo acceso a la información académica de tus **${estudiantes.length} hijos**: **${nombreHijos}**. Puedo ayudarte a analizar sus notas, sugerir rutinas de estudio en casa, identificar materias en riesgo (<51 pts) o comparar su progreso.`
-              : `Tengo acceso al registro académico de tu hijo(a) **${estudianteActivo?.nombres || "estudiante"}**. Puedo ayudarte con consejos de estudio, análisis de materias en riesgo (<51 pts), asistencia y recomendaciones docentes.`,
+              ? `Tengo acceso a la información académica de tus **${estudiantes.length} hijos**: **${nombreHijos}**. Puedo ayudarte a analizar sus notas, sugerir rutinas de estudio en casa, identificar materias en riesgo (<51 pts) o comparar su progreso. También puedo **solicitar licencias** por ti.`
+              : `Tengo acceso al registro académico de tu hijo(a) **${estudianteActivo?.nombres || "estudiante"}**. Puedo ayudarte con consejos de estudio, análisis de materias en riesgo (<51 pts), asistencia, recomendaciones docentes y **solicitar una licencia de ausencia**.`,
           tiempo: "Ahora",
           sugerencias:
             estudiantes && estudiantes.length > 1
               ? [
                   "¿Cómo van mis hijos?",
                   "¿Quién tiene materias en riesgo (<51)?",
-                  "Consejos para mejorar el rendimiento escolar",
+                  "Quiero solicitar una licencia",
                   "Asistencia y faltas de ambos",
                 ]
               : [
                   "¿Tiene materias en riesgo (<51)?",
-                  "¿Cómo puedo ayudarle a mejorar su promedio?",
+                  "Quiero solicitar una licencia",
                   "¿Cuál es su promedio general?",
                   "Observaciones de profesores",
                   "Descargar boletín oficial",
@@ -282,7 +282,7 @@ export default function ChatbotModal() {
               type="text"
               value={inputTexto}
               onChange={(e) => setInputTexto(e.target.value)}
-              placeholder="Pregunta sobre notas, consejos de estudio, materias en riesgo..."
+              placeholder="Pregunta sobre notas, licencias, asistencia, materias en riesgo..."
               className="flex-1 bg-slate-100 border border-slate-300 rounded-2xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:border-red-500 focus:bg-white transition"
               autoFocus
             />
@@ -298,7 +298,7 @@ export default function ChatbotModal() {
 
           {/* Nota de delimitación del agente */}
           <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1.5 px-1">
-            <span>🔒 Agente orientado exclusivamente al desempeño de tus hijos.</span>
+            <span>🔒 Agente orientado al desempeño académico y licencias de tus hijos.</span>
             <span>U.E. Divino Corazón de Jesús</span>
           </div>
         </div>

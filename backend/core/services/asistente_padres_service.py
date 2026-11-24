@@ -55,9 +55,18 @@ _OUT_OF_SCOPE = [
 ]
 _OUT_OF_SCOPE_RE = [re.compile(p, re.IGNORECASE) for p in _OUT_OF_SCOPE]
 
+# Patrón para detectar intents de licencia (siempre permitidos)
+_LICENCIA_INTENT_RE = re.compile(
+    r"\b(licencia|permiso\s+de\s+ausencia|solicitar?\s+permiso|justificar\s+(falta|ausencia)|falta\s+justificada|ausencia\s+justificada)\b",
+    re.IGNORECASE,
+)
+
 
 def _es_fuera_de_alcance(pregunta: str) -> bool:
     texto = pregunta.strip().lower()
+    # Si es un intent de licencia, siempre está dentro del alcance
+    if _LICENCIA_INTENT_RE.search(texto):
+        return False
     return any(r.search(texto) for r in _OUT_OF_SCOPE_RE)
 
 
@@ -69,12 +78,13 @@ Estás hablando con el tutor/padre de familia: {nombre_tutor}.
 Sus hijos registrados en el colegio son: {lista_hijos}.
 
 REGLAS ABSOLUTAS — debes seguirlas sin excepción:
-1. SOLO respondes sobre: calificaciones, promedios, materias reprobadas/en riesgo (<51 pts), asistencia, observaciones de docentes y orientación pedagógica para el hogar de los hijos mencionados arriba.
-2. Si te preguntan sobre cualquier otro tema (matemáticas sueltas como "1+1", cultura general, código, recetas, política, chistes, etc.) responde ÚNICAMENTE con esta frase: "Solo puedo ayudarte con el rendimiento académico de tus hijos en la U.E. Fe y Alegría."
+1. SOLO respondes sobre: calificaciones, promedios, materias reprobadas/en riesgo (<51 pts), asistencia, observaciones de docentes, orientación pedagógica para el hogar y LICENCIAS/PERMISOS DE AUSENCIA de los hijos mencionados arriba.
+2. Si te preguntan sobre cualquier otro tema (matemáticas sueltas como "1+1", cultura general, código, recetas, política, chistes, etc.) responde ÚNICAMENTE con esta frase: "Solo puedo ayudarte con el rendimiento académico y licencias de tus hijos en la U.E. Fe y Alegría."
 3. NUNCA inventes notas, promedios ni asistencias. Usa SIEMPRE las herramientas disponibles para leer datos reales.
 4. Si el padre pregunta por un alumno que NO está en su lista de hijos, niega amablemente: "No tengo acceso a la información de ese estudiante."
 5. Escala de aprobación boliviana: 51 de 100 puntos es el mínimo para aprobar.
-6. Usa tono empático, cercano y motivador. Usa viñetas y negritas para facilitar la lectura en celular."""
+6. Usa tono empático, cercano y motivador. Usa viñetas y negritas para facilitar la lectura en celular.
+7. Si el padre quiere SOLICITAR UNA LICENCIA: usa la herramienta `solicitar_licencia` con el estudiante, motivo y fechas. Pídele los datos que falten antes de llamarla."""
 
 
 # ---------------------------------------------------------------------------
@@ -141,6 +151,40 @@ TOOLS = [
         },
     },
 ]
+
+# Herramienta adicional: solicitar_licencia
+TOOLS.append({
+    "type": "function",
+    "function": {
+        "name": "solicitar_licencia",
+        "description": (
+            "Registra una solicitud de licencia/permiso de ausencia para uno de los hijos del tutor. "
+            "Usala SOLO cuando el padre haya confirmado: estudiante, motivo y fechas de inicio y fin."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "estudiante_nombre": {
+                    "type": "string",
+                    "description": "Nombre del estudiante (puede ser parcial).",
+                },
+                "motivo": {
+                    "type": "string",
+                    "description": "Motivo de la ausencia (ej. enfermedad, cita medica, viaje familiar).",
+                },
+                "fecha_inicio": {
+                    "type": "string",
+                    "description": "Fecha de inicio en formato YYYY-MM-DD.",
+                },
+                "fecha_fin": {
+                    "type": "string",
+                    "description": "Fecha de fin en formato YYYY-MM-DD.",
+                },
+            },
+            "required": ["estudiante_nombre", "motivo", "fecha_inicio", "fecha_fin"],
+        },
+    },
+})
 
 
 # ---------------------------------------------------------------------------
@@ -339,6 +383,45 @@ class AsistentePadresService:
         }
 
     # ------------------------------------------------------------------
+    # Herramienta: solicitar_licencia
+    # ------------------------------------------------------------------
+    def _tool_solicitar_licencia(self, estudiante_nombre: str, motivo: str,
+                                  fecha_inicio: str, fecha_fin: str, **_kwargs):
+        """Crea una solicitud de licencia en nombre del tutor autenticado."""
+        from .license_service import LicenseService
+        hijo = self._encontrar_hijo(estudiante_nombre)
+        if not hijo:
+            hijos_names = [h["nombre_completo"] for h in self._get_hijos()]
+            return {
+                "error": (
+                    f"No encontre ningun hijo tuyo con el nombre {estudiante_nombre!r}. "
+                    f"Los hijos registrados son: {hijos_names}"
+                )
+            }
+        try:
+            svc = LicenseService()
+            resultado = svc.crear(self.usuario, {
+                "estudiante_id": hijo["id"],
+                "motivo": motivo,
+                "fecha_inicio": fecha_inicio,
+                "fecha_fin": fecha_fin,
+                "requiere_respaldo": False,
+            })
+            return {
+                "estado": "exito",
+                "licencia_id": resultado.get("id"),
+                "estudiante": hijo["nombre_completo"],
+                "motivo": motivo,
+                "fecha_inicio": fecha_inicio,
+                "fecha_fin": fecha_fin,
+                "mensaje": "Solicitud de licencia registrada. El personal de la institucion la revisara pronto.",
+            }
+        except (PermissionError, ValueError) as exc:
+            return {"error": str(exc)}
+        except Exception as exc:
+            return {"error": f"No se pudo crear la licencia: {str(exc)}"}
+
+    # ------------------------------------------------------------------
     # Dispatcher de herramientas
     # ------------------------------------------------------------------
     def _ejecutar_tool(self, nombre: str, args: dict):
@@ -347,6 +430,7 @@ class AsistentePadresService:
             "resumen_academico": self._tool_resumen_academico,
             "materias_en_riesgo": self._tool_materias_en_riesgo,
             "asistencia_estudiante": self._tool_asistencia_estudiante,
+            "solicitar_licencia": self._tool_solicitar_licencia,
         }
         handler = handlers.get(nombre)
         if not handler:

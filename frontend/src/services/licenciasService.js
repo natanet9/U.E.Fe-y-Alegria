@@ -26,3 +26,15 @@ export async function approveLicencia(licenciaId, { aceptar = true, observacione
 
   return response.data;
 }
+
+export async function createLicencia(payload) {
+  const response = await apiClient.post('/licencias/', payload);
+  return response.data;
+}
+
+export async function getMisLicencias({ page = 1, pageSize = 20 } = {}) {
+  const response = await apiClient.get('/licencias/', {
+    params: { page, page_size: pageSize },
+  });
+  return response.data;
+}

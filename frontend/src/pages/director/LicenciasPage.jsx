@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { approveLicencia, getLicenciasPage } from '../../services/licenciasService';
 import Toast from '../../components/Toast';
+import CrearLicenciaModal from '../../components/director/CrearLicenciaModal';
 
 const EMPTY_ARRAY = [];
 
@@ -14,6 +15,7 @@ function LicenciasPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState({ mensaje: "", tipo: "success" });
+  const [showModal, setShowModal] = useState(false);
   function showToast(tipo, mensaje) {
     setToast({ mensaje, tipo });
   }
@@ -62,7 +64,27 @@ function LicenciasPage() {
         <p className="text-sm font-semibold uppercase tracking-[0.35em] text-slate-400">Fe y Alegria</p>
         <h1 className="mt-2 text-4xl font-black tracking-tight text-slate-950">Licencias</h1>
         <p className="mt-2 max-w-2xl text-base text-slate-600">Revisa, aprueba o rechaza solicitudes desde un solo tablero.</p>
+        <button
+          type="button"
+          onClick={() => setShowModal(true)}
+          className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-5 py-2.5 text-sm font-bold text-white hover:bg-slate-800 transition shadow-md"
+        >
+          <span className="text-lg leading-none">+</span> Nueva Licencia
+        </button>
       </header>
+
+      {showModal && (
+        <CrearLicenciaModal
+          onClose={() => setShowModal(false)}
+          onCreated={() => {
+            setShowModal(false);
+            showToast('success', 'Licencia creada exitosamente');
+            setEstado('pendiente');
+            setPage(1);
+            loadLicencias();
+          }}
+        />
+      )}
 
       <div className="flex flex-wrap gap-3">
         {['pendiente', 'aprobada', 'rechazada', ''].map((option) => (

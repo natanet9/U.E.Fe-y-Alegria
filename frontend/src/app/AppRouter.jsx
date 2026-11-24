@@ -27,6 +27,7 @@ import PadresDashboardPage from "../pages/padres/PadresDashboardPage";
 import PadresCalificacionesPage from "../pages/padres/PadresCalificacionesPage";
 import PadresAsistenciaPage from "../pages/padres/PadresAsistenciaPage";
 import PadresPerfilPage from "../pages/padres/PadresPerfilPage";
+import PadresLicenciaPage from "../pages/padres/PadresLicenciaPage";
 import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage";
 import ForcePasswordChangePage from "../pages/auth/ForcePasswordChangePage";
 import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
@@ -164,6 +165,7 @@ function AppRouter() {
           <Route path="/padres/calificaciones" element={<PadresCalificacionesPage />} />
           <Route path="/padres/asistencia" element={<PadresAsistenciaPage />} />
           <Route path="/padres/perfil" element={<PadresPerfilPage />} />
+          <Route path="/padres/licencia" element={<PadresLicenciaPage />} />
           <Route path="/padres/boletin" element={<Navigate to="/padres/calificaciones" replace />} />
         </Route>
         <Route
