@@ -27,6 +27,11 @@ function LoginForm() {
       navigate("/cambiar-password-obligatorio");
       return;
     }
+    const role = (usuario?.rol || usuario?.cargo || "").toLowerCase();
+    if (role === "tutor") {
+      navigate("/padres");
+      return;
+    }
     navigate("/dashboard");
   };
 

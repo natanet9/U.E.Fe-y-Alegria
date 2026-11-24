@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getStoredUser, getCurrentUser, isAuthenticated } from "../../services/authService";
 
-function ProtectedRoute({ children, allowedRoles = [] }) {
+function ProtectedRoute({ children, allowedRoles = [], redirectUnauthenticatedTo = "/login" }) {
   const [checking, setChecking] = useState(true);
   const [valid, setValid] = useState(false);
   const [usuario, setUsuario] = useState(null);
@@ -53,7 +53,7 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
   }
 
   if (!valid) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={redirectUnauthenticatedTo} replace />;
   }
 
   const actual = usuario || getStoredUser();
@@ -72,6 +72,9 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
 
     const allowed = allowedRoles.some((role) => userRoles.has(`${role}`.toLowerCase()));
     if (!allowed) {
+      if (userRoles.has("tutor")) {
+        return <Navigate to="/padres" replace />;
+      }
       return <Navigate to="/dashboard" replace />;
     }
   }

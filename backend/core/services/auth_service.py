@@ -14,12 +14,12 @@ class AuthService:
 
     @staticmethod
     def buscar_usuario(identificador):
-        """Busca un usuario por nombre de usuario, correo institucional o correo personal."""
+        """Busca un usuario por nombre de usuario, correo institucional, correo personal o CI."""
         valor = (identificador or '').strip()
         if not valor:
             return None
         return Usuarios.objects.select_related('rol').filter(
-            Q(usuario__iexact=valor) | Q(email__iexact=valor) | Q(correo_personal__iexact=valor),
+            Q(usuario__iexact=valor) | Q(email__iexact=valor) | Q(correo_personal__iexact=valor) | Q(ci__iexact=valor),
         ).first()
 
     def login(self, email, password, ip=None):

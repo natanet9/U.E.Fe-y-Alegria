@@ -1,5 +1,7 @@
 import io
+from pathlib import Path
 
+from django.conf import settings
 from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -7,6 +9,25 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from ..tracing import trace_service_class
 from .access_service import AccessControlService
 from .report_card_service import ReportCardService
+
+
+def get_boletin_template_path() -> Path:
+    candidates = []
+    try:
+        if hasattr(settings, 'BASE_DIR') and settings.BASE_DIR:
+            candidates.append(Path(settings.BASE_DIR) / 'templates' / 'boletin_template.docx')
+    except Exception:
+        pass
+    candidates.append(Path(__file__).resolve().parent.parent.parent / 'templates' / 'boletin_template.docx')
+    candidates.append(Path('/app/templates/boletin_template.docx'))
+
+    for candidate in candidates:
+        if candidate and candidate.is_file():
+            return candidate
+
+    raise FileNotFoundError(
+        f"Plantilla 'boletin_template.docx' no encontrada. Rutas verificadas: {[str(c) for c in candidates]}"
+    )
 
 
 AREA_MAP = {
@@ -73,8 +94,9 @@ class ReportCardDOCXService:
         data = self._rcs.generar_boletin(usuario, estudiante_id, gestion)
         return self._build_docx(data)
 
-    def _build_docx(self, data):
-        doc = Document('/app/templates/boletin_template.docx')
+    def _build_docx(self, data, template_path=None):
+        tpl_path = Path(template_path) if template_path else get_boletin_template_path()
+        doc = Document(str(tpl_path))
 
         est = data['estudiante']
         curso = data['curso']
@@ -94,10 +116,13 @@ class ReportCardDOCXService:
 
         # Row 0: student info
         row0 = t.rows[0]
-        self._set_cell_text(row0.cells[0], 'C\u00f3digo Rude: ', est['rude'])
-        apellidos = f"{est['primer_apellido']} {est['segundo_apellido']}".strip()
-        self._set_cell_text(row0.cells[2], 'Apellido y Nombres: ', f'{apellidos} {est["nombres"]}')
-        self._set_cell_text(row0.cells[6], 'A\u00f1o de Escolaridad: ', f'{curso["grado"]} {curso["paralelo"]}')
+        self._set_cell_text(row0.cells[0], 'C\u00f3digo Rude: ', est.get('rude') or '')
+        apellidos = f"{est.get('primer_apellido') or ''} {est.get('segundo_apellido') or ''}".strip()
+        nombres = est.get('nombres') or ''
+        self._set_cell_text(row0.cells[2], 'Apellido y Nombres: ', f'{apellidos} {nombres}'.strip())
+        grado = curso.get('grado') or ''
+        paralelo = curso.get('paralelo') or ''
+        self._set_cell_text(row0.cells[6], 'A\u00f1o de Escolaridad: ', f'{grado} {paralelo}'.strip())
         for p in row0.cells[6].paragraphs:
             p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
 

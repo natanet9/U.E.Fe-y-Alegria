@@ -148,9 +148,11 @@ class EnrollmentService:
         )
 
         # Crear tutor si se proporciona CI
+        credenciales_tutor = None
         if tutor_data.get('ci'):
-            tutor, _ = Tutores.objects.get_or_create(
-                ci=tutor_data['ci'],
+            ci_tutor = str(tutor_data['ci']).strip()
+            tutor, tutor_created = Tutores.objects.get_or_create(
+                ci=ci_tutor,
                 defaults={
                     'nombres': tutor_data.get('nombres', ''),
                     'primer_apellido': tutor_data.get('primer_apellido', ''),
@@ -164,12 +166,63 @@ class EnrollmentService:
                 defaults={'es_principal': True},
             )
 
+            # Verificar si el tutor ya tiene cuenta de usuario, si no, crearla
+            if not tutor.usuario_id:
+                from django.contrib.auth.hashers import make_password
+                from ..models import Roles, Usuarios
+
+                rol_tutor, _ = Roles.objects.get_or_create(
+                    nombre='tutor',
+                    defaults={'descripcion': 'Tutor / padre o madre de familia'},
+                )
+                email_tutor = (tutor_data.get('email') or f"tutor.{ci_tutor}@feya.edu.bo").strip().lower()
+                base_email = email_tutor
+                idx = 1
+                while Usuarios.objects.filter(email__iexact=email_tutor).exists():
+                    email_tutor = f"tutor.{ci_tutor}_{idx}@feya.edu.bo"
+                    idx += 1
+
+                password_temporal = '123456'
+                cuenta = Usuarios.objects.create(
+                    ci=ci_tutor,
+                    nombre=tutor.nombres,
+                    primer_apellido=tutor.primer_apellido,
+                    email=email_tutor,
+                    usuario=ci_tutor,
+                    correo_personal=email_tutor,
+                    password_hash=make_password(password_temporal),
+                    rol=rol_tutor,
+                    activo=True,
+                    password_temporal=True,
+                    debe_cambiar_password=True,
+                )
+                tutor.usuario = cuenta
+                tutor.save(update_fields=['usuario'])
+
+                credenciales_tutor = {
+                    'ci': ci_tutor,
+                    'usuario': ci_tutor,
+                    'password_temporal': password_temporal,
+                    'nombre_completo': f"{tutor.nombres} {tutor.primer_apellido}".strip(),
+                    'cuenta_creada': True,
+                    'es_nuevo_tutor': tutor_created,
+                }
+            else:
+                credenciales_tutor = {
+                    'ci': ci_tutor,
+                    'usuario': tutor.usuario.usuario or ci_tutor,
+                    'nombre_completo': f"{tutor.nombres} {tutor.primer_apellido}".strip(),
+                    'cuenta_creada': False,
+                    'es_nuevo_tutor': False,
+                }
+
         self.audit.record_inscripcion_change(usuario, 'CREATE' if created else 'UPDATE', inscripcion.id, {'rude': rude, 'curso_id': curso_id, 'gestion': gestion})
         return {
             'mensaje': 'Estudiante inscrito exitosamente',
             'estudiante_id': estudiante.id,
             'inscripcion_id': inscripcion.id,
             'nuevo': created,
+            'credenciales_tutor': credenciales_tutor,
         }
 
     def re_enroll_existing_student(self, usuario, rude, curso_id, gestion=2026):

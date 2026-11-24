@@ -96,6 +96,8 @@ function EnrollmentPage() {
     direccion: "",
   });
   const [showTutorForm, setShowTutorForm] = useState(false);
+  const [tutorCredencialesModal, setTutorCredencialesModal] = useState(null);
+  const [copiado, setCopiado] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -232,6 +234,9 @@ function EnrollmentPage() {
     try {
       const resultado = await enrollNewStudent(newForm);
       showToast("success", resultado.mensaje);
+      if (resultado.credenciales_tutor && resultado.credenciales_tutor.cuenta_creada) {
+        setTutorCredencialesModal(resultado.credenciales_tutor);
+      }
       setNewForm({
         nombres: "",
         primer_apellido: "",
@@ -807,6 +812,85 @@ function EnrollmentPage() {
           </form>
         )}
       </div>
+
+      {/* Modal de credenciales generadas para nuevo tutor */}
+      {tutorCredencialesModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl font-bold">
+                ✓
+              </div>
+              <div className="flex-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                  Nuevo Tutor Registrado
+                </span>
+                <h3 className="text-lg font-black text-slate-900 mt-1">
+                  Credenciales de Acceso para el Tutor
+                </h3>
+              </div>
+            </div>
+
+            <div className="mt-4 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+              <p className="text-xs text-slate-600">
+                Se ha generado automáticamente la cuenta de acceso al portal móvil de padres para:
+              </p>
+              <div className="bg-white rounded-xl p-3 border border-slate-200 text-sm space-y-2">
+                <div className="flex justify-between items-center text-xs text-slate-500">
+                  <span>Tutor / Padre:</span>
+                  <span className="font-semibold text-slate-900 text-sm">{tutorCredencialesModal.nombre_completo || "Padre de familia"}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-slate-500">
+                  <span>C.I. (Usuario de acceso):</span>
+                  <span className="font-mono font-bold text-slate-900 text-base">{tutorCredencialesModal.ci}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-slate-500">
+                  <span>Contraseña Temporal:</span>
+                  <span className="font-mono font-bold text-emerald-700 text-base bg-emerald-50 px-2 py-0.5 rounded">
+                    {tutorCredencialesModal.password_temporal || "123456"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800 flex items-start gap-2">
+                <span className="text-base">⚠️</span>
+                <span>
+                  Entregue estas credenciales en persona al padre/madre. El tutor ingresará en <strong>/padres/login</strong> con su C.I. y esta contraseña provisional.
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-5 flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  const texto = `U.E. Fe y Alegría - Portal de Padres\nTutor: ${tutorCredencialesModal.nombre_completo}\nUsuario / C.I.: ${tutorCredencialesModal.ci}\nContraseña Temporal: ${tutorCredencialesModal.password_temporal || "123456"}\nEnlace: /padres/login`;
+                  navigator.clipboard.writeText(texto);
+                  setCopiado(true);
+                  setTimeout(() => setCopiado(false), 2500);
+                }}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 transition"
+              >
+                {copiado ? "✓ ¡Copiado!" : "📋 Copiar datos"}
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 transition"
+              >
+                🖨️ Imprimir
+              </button>
+              <button
+                type="button"
+                onClick={() => setTutorCredencialesModal(null)}
+                className="rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-bold text-white hover:bg-slate-800 transition"
+              >
+                Entendido / Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

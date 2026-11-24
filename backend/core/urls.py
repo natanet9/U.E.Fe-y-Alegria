@@ -96,4 +96,6 @@ urlpatterns = [
     path('notificaciones/', views.notificaciones_view, name='notificaciones'),
     path('notificaciones/<int:notificacion_id>/leer/', views.notificaciones_marcar_leida_view, name='notificaciones_marcar_leida'),
     path('notificaciones/leer-todas/', views.notificaciones_marcar_todas_view, name='notificaciones_marcar_todas'),
+    # Asistente Académico para Padres de Familia (Tool Calling - Groq)
+    path('padres/asistente/', views.padres_asistente_view, name='padres_asistente'),
 ]

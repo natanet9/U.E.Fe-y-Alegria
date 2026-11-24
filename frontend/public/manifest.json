@@ -1,25 +1,31 @@
 {
-  "short_name": "Sistema de Gestión Académica - U.E. Divino Corazón de Jesús",
-  "name": "Sistema de Gestión Académica - U.E. Divino Corazón de Jesús",
+  "short_name": "Fe y Alegría",
+  "name": "Sistema de Gestión Académica - U.E. Fe y Alegría",
+  "description": "Sistema de gestión académica y portal escolar para estudiantes, docentes, padres de familia y administración de la U.E. Fe y Alegría.",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "assets/login/logoUEdivino.jpg",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "type": "image/jpeg"
     },
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait-primary",
+  "theme_color": "#0f2338",
+  "background_color": "#f1f5f9",
+  "lang": "es-BO"
 }

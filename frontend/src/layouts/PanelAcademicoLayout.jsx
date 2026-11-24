@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { getStoredUser, logoutRequest } from "../services/authService";
 import NotificationBell from "../components/notifications/NotificationBell";
@@ -9,7 +9,9 @@ const menu = [
   { to: "/estudiantes", label: "Estudiantes", icon: "users", rolesVisibles: ["director", "secretaria", "regente", "docente", "tutor"] },
   { to: "/docentes", label: "Docentes", icon: "users", rolesVisibles: ["director", "secretaria", "regente"] },
   { to: "/inscripcion", label: "Inscripción", icon: "users", rolesVisibles: ["director", "secretaria"] },
+  { to: "/tutores", label: "Padres / Tutores", icon: "users", rolesVisibles: ["director", "secretaria"] },
   { to: "/cursos", label: "Cursos", icon: "book", rolesVisibles: ["director", "secretaria", "regente", "docente"] },
+  { to: "/mis-areas", label: "Mis Áreas", icon: "book", rolesVisibles: ["docente"] },
   { to: "/calificaciones", label: "Calificaciones", icon: "grade", rolesVisibles: ["director", "secretaria", "regente", "docente", "estudiante"] },
   { to: "/horarios", label: "Horarios", icon: "calendar", rolesVisibles: ["director", "secretaria", "regente", "docente"] },
   { to: "/reportes", label: "Reportes", icon: "report", rolesVisibles: ["director", "secretaria", "regente"] },
@@ -19,6 +21,7 @@ const menu = [
   { to: "/usuarios", label: "Usuarios", icon: "users", rolesVisibles: ["director"] },
   { to: "/licencias", label: "Licencias", icon: "report", rolesVisibles: ["director", "secretaria", "regente"] },
 ];
+
 
 function Icon({ name, className = "w-5 h-5" }) {
   switch (name) {
@@ -86,6 +89,9 @@ function Icon({ name, className = "w-5 h-5" }) {
 function PanelAcademicoLayout() {
   const usuario = getStoredUser();
   const roleRaw = usuario?.cargo || usuario?.rol || (Array.isArray(usuario?.roles) ? usuario.roles[0] : "") || "docente";
+  if (`${roleRaw}`.toLowerCase() === "tutor") {
+    return <Navigate to="/padres" replace />;
+  }
   const roleLabel = roleRaw ? `${roleRaw}`.charAt(0).toUpperCase() + `${roleRaw}`.slice(1) : "Docente";
   const isDirector = `${roleRaw}`.toLowerCase() === "director";
   const navigate = useNavigate();
