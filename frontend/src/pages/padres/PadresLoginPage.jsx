@@ -45,7 +45,7 @@ export default function PadresLoginPage() {
     {
       id: "m-1",
       sender: "bot",
-      text: "¡Hola! 👋 Te doy la bienvenida al Portal Familiar de la Unidad Educativa Fe y Alegría.",
+      text: "¡Hola! 👋 Te doy la bienvenida al Portal Familiar de la Unidad Educativa Divino Corazón de Jesús.",
       tiempo: "Ahora",
     },
     {
@@ -271,9 +271,9 @@ export default function PadresLoginPage() {
       agregarMensaje("user", "¿Cómo recupero o cambio mi contraseña?");
       responderBotConRetardo(
         "🔒 **Restablecimiento de Contraseña para Tutores**\n\n" +
-          "Por normativas de seguridad institucional de la U.E. Fe y Alegría, **no se realiza recuperación de contraseña por correo electrónico** en esta plataforma.\n\n" +
+          "Por normativas de seguridad institucional de la U.E. Divino Corazón de Jesús, **no se realiza recuperación de contraseña por correo electrónico** en esta plataforma.\n\n" +
           "Para recuperar o solicitar una nueva contraseña:\n" +
-          "1. Debes presentarte en la **Dirección o Secretaría de la U.E. Fe y Alegría**.\n" +
+          "1. Debes presentarte en la **Dirección o Secretaría de la U.E. Divino Corazón de Jesús**.\n" +
           "2. Presentar tu **Cédula de Identidad (CI)** original para validar tu titularidad como tutor legal.\n" +
           "3. El personal autorizado te otorgará una contraseña temporal de acceso inmediato.\n\n" +
           "⏰ *Horario de atención:* Lunes a Viernes de 08:00 a 16:00.",
@@ -386,7 +386,7 @@ export default function PadresLoginPage() {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-slate-900 text-sm sm:text-base leading-none">
-                  U.E. Fe y Alegría
+                  U.E. Divino Corazón de Jesús
                 </span>
                 <span className="bg-red-100 text-red-700 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
                   PORTAL FAMILIAS
@@ -458,7 +458,7 @@ export default function PadresLoginPage() {
               </div>
 
               <span className="text-[10px] bg-white/20 font-semibold px-2 py-0.5 rounded-full">
-                U.E. Fe y Alegría
+                U.E. Divino Corazón de Jesús
               </span>
             </div>
 
@@ -719,7 +719,7 @@ export default function PadresLoginPage() {
                 </button>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Por políticas de seguridad institucional de la U.E. Fe y Alegría, el restablecimiento de contraseñas de tutores se realiza de forma presencial en la <strong>Secretaría o Dirección del colegio</strong> presentando tu Carnet de Identidad (CI).
+                Por políticas de seguridad institucional de la U.E. Divino Corazón de Jesús, el restablecimiento de contraseñas de tutores se realiza de forma presencial en la <strong>Secretaría o Dirección del colegio</strong> presentando tu Carnet de Identidad (CI).
               </p>
               <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-[11px] text-slate-600">
                 <strong>Horario de atención:</strong> Lunes a Viernes de 08:00 a 16:00.
@@ -737,7 +737,7 @@ export default function PadresLoginPage() {
         {/* Pie con indicaciones institucionales */}
         <div className="mt-4 bg-white/70 backdrop-blur-sm rounded-2xl p-3 border border-slate-200/80 text-[11px] text-slate-500 text-center space-y-1">
           <p>
-            <strong>Portal exclusivo para Padres de Familia</strong> • U.E. Fe y Alegría
+            <strong>Portal exclusivo para Padres de Familia</strong> • U.E. Divino Corazón de Jesus
           </p>
           <div className="text-slate-400">
             Acceso seguro y protegido a las calificaciones escolares

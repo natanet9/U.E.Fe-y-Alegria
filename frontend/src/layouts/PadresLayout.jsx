@@ -76,12 +76,15 @@ function PadresLayoutContent() {
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-red-600 flex items-center justify-center text-white font-black text-lg shadow-sm">
-              FA
+              <img
+                src="/assets/login/logoUEdivino.jpg"
+                alt="Logo U.E. Divino Corazón de Jesús"
+              />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <h1 className="font-bold text-sm sm:text-base text-slate-900 tracking-tight leading-none">
-                  U.E. Fe y Alegría
+                  U.E. Divino Corazón de Jesús
                 </h1>
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-red-100 text-red-700 leading-none">
                   FAMILIA

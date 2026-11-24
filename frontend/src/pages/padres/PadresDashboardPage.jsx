@@ -33,7 +33,7 @@ export default function PadresDashboardPage() {
       <div className="flex flex-col items-center justify-center py-24 text-slate-500 gap-3">
         <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
         <p className="text-sm font-semibold text-slate-700">Cargando el portal de tus hijos...</p>
-        <span className="text-xs text-slate-400">U.E. Fe y Alegría</span>
+        <span className="text-xs text-slate-400">U.E. Divino Corazón de Jesús</span>
       </div>
     );
   }
@@ -500,10 +500,10 @@ export default function PadresDashboardPage() {
       <div className="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-2xs text-xs text-slate-500 space-y-1.5 text-center">
         <div className="font-bold text-slate-800 flex items-center justify-center gap-1.5">
           <span>❤️</span>
-          <span>Unidad Educativa Fe y Alegría</span>
+          <span>Unidad Educativa Divino Corazón de Jesús</span>
         </div>
         <p className="text-[11px] leading-relaxed max-w-sm mx-auto text-slate-500">
-          "Donde termina el asfalto, donde no llega el agua, allí comienza Fe y Alegría para brindar una educación integral a nuestras familias."
+          "Donde termina el asfalto, donde no llega el agua, allí comienza Divino Corazón de Jesús para brindar una educación integral a nuestras familias."
         </p>
       </div>
     </div>
