@@ -1,12 +1,12 @@
 {
-  "short_name": "Portal Padres",
-  "name": "Fe y Alegría - Portal de Padres de Familia",
-  "description": "Aplicación móvil y portal para padres de familia de la Unidad Educativa Fe y Alegría. Consulta calificaciones, boletines y asistencia de tus hijos.",
+  "short_name": "Divino Corazón",
+  "name": "Sistema de Gestión Académica - U.E. Divino Corazón de Jesús",
+  "description": "Sistema de gestión académica y portal escolar para estudiantes, docentes, padres de familia y administración de la U.E. Divino Corazón de Jesús.",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "assets/login/logoUEdivino.jpg",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "type": "image/jpeg"
     },
     {
       "src": "logo192.png",
@@ -21,11 +21,11 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/padres",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#dc2626",
+  "theme_color": "#0f2338",
   "background_color": "#f1f5f9",
   "lang": "es-BO"
 }

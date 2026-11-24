@@ -33,7 +33,7 @@ export default function ChatbotModal() {
         {
           id: "init-1",
           sender: "bot",
-          text: `¡Hola, estimado(a) **${usuario?.nombre || "Tutor"}**! 👋 Soy tu Asistente Escolar y Pedagógico de Fe y Alegría.`,
+          text: `¡Hola, estimado(a) **${usuario?.nombre || "Tutor"}**! 👋 Soy tu Asistente Escolar y Pedagógico de U.E. Divino Corazón de Jesús.`,
           tiempo: "Ahora",
         },
         {
@@ -155,7 +155,7 @@ export default function ChatbotModal() {
                 )}
               </div>
               <p className="text-[11px] text-rose-100 mt-0.5">
-                U.E. Fe y Alegría • Orientación a Familias
+                U.E. Divino Corazón de Jesús • Orientación a Familias
               </p>
             </div>
           </div>
@@ -299,7 +299,7 @@ export default function ChatbotModal() {
           {/* Nota de delimitación del agente */}
           <div className="flex items-center justify-between text-[10px] text-slate-400 mt-1.5 px-1">
             <span>🔒 Agente orientado exclusivamente al desempeño de tus hijos.</span>
-            <span>U.E. Fe y Alegría</span>
+            <span>U.E. Divino Corazón de Jesús</span>
           </div>
         </div>
       </div>
