@@ -44,6 +44,20 @@ npm install
 npm start
 ```
 
+### 🔹 Asistente virtual
+
+El panel académico muestra la burbuja para director, secretaría, regencia, docentes y
+estudiantes autenticados; los tutores conservan su asistente pedagógico actual. Para activar
+el motor local del asistente, inicia su API en una terminal aparte:
+
+```powershell
+cd AsistenteEmpresarial\backend
+py -m pip install -r requirements.txt
+py -m uvicorn app:app --reload --host 127.0.0.1 --port 8001
+```
+
+La clave `GROQ_API_KEY` es opcional; sin ella se usa el motor local.
+
 ---
 
 ## ✉️ Correo (SMTP) y códigos de recuperación
