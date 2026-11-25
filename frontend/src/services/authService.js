@@ -14,6 +14,7 @@ export function clearUser() {
   localStorage.removeItem(USER_KEY);
   localStorage.removeItem(OTP_KEY);
   localStorage.removeItem("reset_token");
+  localStorage.removeItem("padres_active_child");
 }
 
 export function storeOtpChallenge(challenge) {

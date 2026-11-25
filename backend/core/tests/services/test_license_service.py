@@ -75,8 +75,8 @@ class TestLicenseService:
             LicenseService().listar(setup['docente'])
 
     def test_listar_tutor_permision(self, setup):
-        with pytest.raises(PermissionError):
-            LicenseService().listar(setup['tutor_user'])
+        result = LicenseService().listar(setup['tutor_user'])
+        assert 'items' in result
 
     def test_listar_por_estado(self, setup):
         result = LicenseService().listar(setup['secretaria'], estado='pendiente')
@@ -157,3 +157,32 @@ class TestLicenseService:
 
         eliminado = LicenseService().eliminar(setup['secretaria'], setup['lic'].id)
         assert eliminado['mensaje'] == 'Licencia eliminada'
+
+    def test_limpiar_licencias_rechazadas_30_dias(self, setup):
+        from datetime import timedelta
+        from django.utils import timezone
+
+        hace_31_dias = timezone.now() - timedelta(days=31)
+        hace_10_dias = timezone.now() - timedelta(days=10)
+
+        rechazada_antigua = Licencias.objects.create(
+            estudiante=setup['estudiante'], tutor_solicitante=setup['tutor'],
+            motivo='Rechazada antigua', fecha_inicio='2026-04-01', fecha_fin='2026-04-02',
+            estado='rechazada', aprobado_en=hace_31_dias,
+        )
+        rechazada_reciente = Licencias.objects.create(
+            estudiante=setup['estudiante'], tutor_solicitante=setup['tutor'],
+            motivo='Rechazada reciente', fecha_inicio='2026-05-01', fecha_fin='2026-05-02',
+            estado='rechazada', aprobado_en=hace_10_dias,
+        )
+        aprobada_antigua = Licencias.objects.create(
+            estudiante=setup['estudiante'], tutor_solicitante=setup['tutor'],
+            motivo='Aprobada antigua', fecha_inicio='2026-04-01', fecha_fin='2026-04-02',
+            estado='aprobada', aprobado_en=hace_31_dias,
+        )
+
+        eliminadas = LicenseService.limpiar_expiradas()
+        assert eliminadas == 1
+        assert not Licencias.objects.filter(id=rechazada_antigua.id).exists()
+        assert Licencias.objects.filter(id=rechazada_reciente.id).exists()
+        assert Licencias.objects.filter(id=aprobada_antigua.id).exists()

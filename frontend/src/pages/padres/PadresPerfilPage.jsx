@@ -5,7 +5,7 @@ import { logoutRequest, changePasswordRequest } from "../../services/authService
 
 export default function PadresPerfilPage() {
   const navigate = useNavigate();
-  const { usuario, pwaInstallable, promptInstallPwa, estudiantes } = usePadres();
+  const { usuario, setUsuario, pwaInstallable, promptInstallPwa, estudiantes } = usePadres();
 
   const [cambiandoPass, setCambiandoPass] = useState(false);
   const [actualPass, setActualPass] = useState("");
@@ -14,11 +14,16 @@ export default function PadresPerfilPage() {
   const [passError, setPassError] = useState("");
   const [passSuccess, setPassSuccess] = useState("");
   const [guardandoPass, setGuardandoPass] = useState(false);
+  const [cerrandoSesion, setCerrandoSesion] = useState(false);
 
   const handleLogout = async () => {
-    if (window.confirm("¿Seguro que deseas cerrar sesión?")) {
+    if (cerrandoSesion) return;
+    setCerrandoSesion(true);
+    try {
       await logoutRequest();
-      navigate("/padres/login");
+      setUsuario?.(null);
+    } finally {
+      navigate("/padres/login", { replace: true });
     }
   };
 
@@ -222,11 +227,13 @@ export default function PadresPerfilPage() {
       {/* Botón de Cerrar Sesión */}
       <div className="pt-2">
         <button
+          type="button"
           onClick={handleLogout}
-          className="w-full py-3 bg-white hover:bg-slate-50 text-red-600 font-bold rounded-2xl text-xs border border-red-200 shadow-2xs transition flex items-center justify-center gap-2 active:scale-98"
+          disabled={cerrandoSesion}
+          className="w-full py-3 bg-white hover:bg-red-50 text-red-600 font-bold rounded-2xl text-xs border border-red-200 shadow-2xs transition flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
         >
           <span>🚪</span>
-          <span>Cerrar Sesión</span>
+          <span>{cerrandoSesion ? "Cerrando sesión..." : "Cerrar Sesión"}</span>
         </button>
       </div>
     </div>

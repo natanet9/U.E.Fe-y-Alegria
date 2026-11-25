@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.db.models import Q
 from django.utils import timezone
 
 from ..models import Licencias, Inscripciones, DocenteAsignacion, Docentes
@@ -22,10 +23,14 @@ class LicenseService:
 
     @classmethod
     def limpiar_expiradas(cls, dias=None):
-        """Elimina de la base de datos las licencias con mas de 30 dias desde su creacion."""
+        """Elimina de la base de datos las licencias rechazadas con mas de 30 dias."""
         retencion = cls.RETENCION_DIAS if dias is None else dias
         limite = timezone.now() - timedelta(days=retencion)
-        eliminadas, _ = Licencias.objects.filter(created_at__lt=limite).delete()
+        eliminadas, _ = Licencias.objects.filter(
+            estado='rechazada'
+        ).filter(
+            Q(aprobado_en__lt=limite) | Q(aprobado_en__isnull=True, updated_at__lt=limite)
+        ).delete()
         return eliminadas
 
     def listar(self, usuario, estado=None, page=1, page_size=20):

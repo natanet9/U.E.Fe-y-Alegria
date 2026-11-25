@@ -1,12 +1,26 @@
-import React from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { PadresProvider, usePadres } from "../context/PadresContext";
+import { logoutRequest } from "../services/authService";
 import StudentSelector from "../components/padres/StudentSelector";
 import ChatbotModal from "../components/padres/ChatbotModal";
 
 function PadresLayoutContent() {
-  const { setChatbotOpen, pwaInstallable, promptInstallPwa, estudianteActivo } = usePadres();
+  const { setChatbotOpen, setUsuario, pwaInstallable, promptInstallPwa, estudianteActivo } = usePadres();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [cerrandoSesion, setCerrandoSesion] = useState(false);
+
+  const handleLogout = async () => {
+    if (cerrandoSesion) return;
+    setCerrandoSesion(true);
+    try {
+      await logoutRequest();
+      setUsuario?.(null);
+    } finally {
+      navigate("/padres/login", { replace: true });
+    }
+  };
 
   // Bottom Navigation tabs definition
   const navTabs = [
@@ -132,6 +146,18 @@ function PadresLayoutContent() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
               </span>
               <span>Chatbot IA</span>
+            </button>
+
+            {/* Cerrar sesión rápido */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={cerrandoSesion}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-700 border border-slate-200 hover:border-rose-200 text-xs font-semibold transition active:scale-95 disabled:opacity-50"
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
+            >
+              <span>Salir</span>
             </button>
           </div>
         </div>
