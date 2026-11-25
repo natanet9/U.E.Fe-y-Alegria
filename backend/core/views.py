@@ -1,7 +1,13 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+import json
+import os
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
 from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import connection
 from django.http import HttpResponse
 from django.db.migrations.executor import MigrationExecutor
@@ -123,6 +129,161 @@ def health_view(request):
 
     checks["duration_ms"] = round((time.time() - start) * 1000, 1)
     return Response(checks, status=status_code)
+
+
+# ── Asistente autorizado para personal académico ──────────────────────────────
+
+
+def _assistant_context(usuario):
+    rol = ac.get_role_name(usuario)
+    secciones_por_rol = {
+        "director": [
+            "Dashboard", "Estado de Notas", "Estudiantes", "Docentes", "Inscripción",
+            "Padres / Tutores", "Cursos", "Calificaciones", "Horarios", "Reportes",
+            "Boletín", "Periodos", "Dimensiones", "Usuarios", "Licencias",
+        ],
+        "secretaria": [
+            "Dashboard", "Estado de Notas", "Estudiantes", "Docentes", "Inscripción",
+            "Padres / Tutores", "Cursos", "Calificaciones", "Horarios", "Reportes",
+            "Boletín", "Licencias",
+        ],
+        "regente": [
+            "Dashboard", "Estudiantes", "Docentes", "Cursos", "Calificaciones",
+            "Horarios", "Reportes", "Boletín", "Licencias",
+        ],
+        "docente": [
+            "Dashboard", "Estudiantes", "Cursos", "Mis Áreas", "Calificaciones",
+            "Horarios", "Boletín",
+        ],
+        "estudiante": ["Dashboard", "Calificaciones", "Boletín", "Horarios"],
+    }
+    context = {
+        "usuario": {
+            "id": usuario.id,
+            "nombre": usuario.nombre_completo,
+            "rol": rol,
+            "secciones_disponibles": secciones_por_rol.get(rol, []),
+        },
+        "rol": rol,
+        "permite_todos_los_estudiantes": ac.puede_ver_todo(usuario),
+        "estudiantes": [],
+        "todosBoletines": {},
+        "cursos": [],
+        "resumen_institucional": {},
+    }
+
+    if ac.puede_ver_todo(usuario):
+        dashboard = DashboardService().build_dashboard(usuario)
+        context["resumen_institucional"] = {
+            "tipo": "lectura_total",
+            "periodo_activo": dashboard.get("periodo_activo"),
+            "estadisticas": dashboard,
+        }
+
+    if ac.es_docente(usuario):
+        asignaciones = ac.get_asignaciones_docente(usuario).select_related(
+            "curso", "area", "curso__grado", "curso__paralelo"
+        )
+        for asignacion in asignaciones:
+            context["cursos"].append({
+                "id": asignacion.id,
+                "nombre": str(asignacion.curso),
+                "area": asignacion.area.nombre,
+                "gestion": asignacion.gestion,
+            })
+
+        estudiante_ids = ac.get_estudiantes_ids_docente(usuario)
+        estudiantes = Estudiantes.objects.filter(
+            id__in=estudiante_ids,
+            estado="activo",
+        ).order_by("primer_apellido", "nombres")
+        for estudiante in estudiantes:
+            inscripcion = Inscripciones.objects.filter(
+                estudiante=estudiante,
+                estado="activo",
+            ).select_related("curso").order_by("-gestion").first()
+            context["estudiantes"].append({
+                "id": estudiante.id,
+                "nombres": estudiante.nombres,
+                "primer_apellido": estudiante.primer_apellido,
+                "segundo_apellido": estudiante.segundo_apellido or "",
+                "grado": str(inscripcion.curso) if inscripcion else None,
+                "gestion": inscripcion.gestion if inscripcion else None,
+            })
+
+    return context
+
+
+@api_view(["POST"])
+@trace_view_function
+def assistant_chat_view(request):
+    usuario = _get_usuario(request)
+    if not usuario:
+        return Response({"error": "No autorizado"}, status=401)
+
+    rol = ac.get_role_name(usuario)
+    if rol not in {"director", "secretaria", "regente", "docente", "estudiante"}:
+        return Response({"error": "No tienes permisos para usar este asistente"}, status=403)
+
+    question = str(request.data.get("question") or "").strip()
+    history = request.data.get("history") or []
+    if not question:
+        return Response({"error": "Debes enviar una pregunta"}, status=400)
+    if len(question) > 2000:
+        return Response({"error": "La pregunta supera los 2000 caracteres"}, status=400)
+    if not isinstance(history, list):
+        return Response({"error": "El historial debe ser una lista"}, status=400)
+
+    history = history[-8:]
+    context = _assistant_context(usuario)
+    payload = {
+        "question": question,
+        "context": context,
+        "history": [
+            {
+                "sender": item.get("sender") if item.get("sender") in {"user", "bot", "assistant"} else "bot",
+                "text": str(item.get("text") or "")[:2000],
+            }
+            for item in history
+            if isinstance(item, dict)
+        ],
+    }
+
+    assistant_url = os.getenv("ASSISTANT_API_URL", "http://127.0.0.1:8001").rstrip("/")
+    request_obj = Request(
+        f"{assistant_url}/api/chat",
+        data=json.dumps(payload, cls=DjangoJSONEncoder).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urlopen(request_obj, timeout=30) as response:
+            assistant_data = json.loads(response.read().decode("utf-8"))
+    except HTTPError as error:
+        try:
+            detail = json.loads(error.read().decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            detail = {}
+        return Response(
+            {"error": detail.get("detail") or "El asistente no pudo procesar la consulta."},
+            status=502,
+        )
+    except (URLError, TimeoutError):
+        return Response(
+            {"error": "El asistente no está disponible temporalmente."},
+            status=503,
+        )
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return Response({"error": "El asistente devolvió una respuesta inválida."}, status=502)
+
+    answer = assistant_data.get("answer")
+    if not answer:
+        return Response({"error": "El asistente respondió sin contenido."}, status=502)
+    return Response({
+        "answer": answer,
+        "source": assistant_data.get("source", "assistant"),
+        "model": assistant_data.get("model"),
+    }, status=200)
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────

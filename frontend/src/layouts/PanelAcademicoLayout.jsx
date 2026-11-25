@@ -2,6 +2,7 @@ import { Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-route
 import { useState } from "react";
 import { getStoredUser, logoutRequest } from "../services/authService";
 import NotificationBell from "../components/notifications/NotificationBell";
+import AssistantBubble from "../components/auth/AssistantBubble";
 
 const menu = [
   { to: "/dashboard", label: "Dashboard", icon: "home" },
@@ -89,16 +90,19 @@ function Icon({ name, className = "w-5 h-5" }) {
 function PanelAcademicoLayout() {
   const usuario = getStoredUser();
   const roleRaw = usuario?.cargo || usuario?.rol || (Array.isArray(usuario?.roles) ? usuario.roles[0] : "") || "docente";
-  if (`${roleRaw}`.toLowerCase() === "tutor") {
-    return <Navigate to="/padres" replace />;
-  }
   const roleLabel = roleRaw ? `${roleRaw}`.charAt(0).toUpperCase() + `${roleRaw}`.slice(1) : "Docente";
-  const isDirector = `${roleRaw}`.toLowerCase() === "director";
+  const roleName = `${roleRaw}`.toLowerCase();
+  const isDirector = roleName === "director";
+  const canUseAssistant = ["director", "secretaria", "regente", "docente", "estudiante"].includes(roleName);
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  if (roleName === "tutor") {
+    return <Navigate to="/padres" replace />;
+  }
 
   const currentMenu = menu.find((item) => location.pathname.startsWith(item.to));
   const currentSectionTitle = currentMenu?.label || "Panel Académico";
@@ -294,6 +298,7 @@ function PanelAcademicoLayout() {
             <Outlet />
           </div>
         </main>
+        {canUseAssistant && <AssistantBubble />}
       </div>
     </div>
   );

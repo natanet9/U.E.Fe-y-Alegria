@@ -66,6 +66,41 @@ describe("PanelAcademicoLayout", () => {
     expect(screen.getByText(/panel del director/i)).toBeInTheDocument();
     expect(screen.getByText(/boletín/i)).toBeInTheDocument();
     expect(screen.getByText(/licencias/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /abrir asistente virtual/i })).toBeInTheDocument();
+  });
+
+  it.each(["secretaria", "regente", "docente", "estudiante"])("muestra el asistente a %s", (role) => {
+    getStoredUser.mockReturnValue({ nombre: "Elena", primer_apellido: "Lopez", cargo: role });
+
+    render(
+      <MemoryRouter initialEntries={["/dashboard"]}>
+        <Routes>
+          <Route element={<PanelAcademicoLayout />}>
+            <Route path="/dashboard" element={<div>contenido dashboard</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("button", { name: /abrir asistente virtual/i })).toBeInTheDocument();
+  });
+
+  it("redirige tutores sin mostrar el asistente académico", () => {
+    getStoredUser.mockReturnValue({ nombre: "Luis", primer_apellido: "Tutor", cargo: "tutor" });
+
+    render(
+      <MemoryRouter initialEntries={["/dashboard"]}>
+        <Routes>
+          <Route element={<PanelAcademicoLayout />}>
+            <Route path="/dashboard" element={<div>contenido dashboard</div>} />
+          </Route>
+          <Route path="/padres" element={<div>portal tutores</div>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText(/portal tutores/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /abrir asistente virtual/i })).not.toBeInTheDocument();
   });
 
   it("oculta items segun rol de docente", () => {
