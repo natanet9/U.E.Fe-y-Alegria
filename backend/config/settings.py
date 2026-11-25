@@ -10,8 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
+import secrets
 from pathlib import Path
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 load_dotenv()
 
@@ -22,15 +24,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(3zvwmq322-ptb(tzf$hd=w#0x=exhm3+1wvb!dzb(c5z7=il='
-
 # SECURITY WARNING: don't run with debug turned on in production!
-# Use environment variable `DJANGO_DEBUG` to control debug mode. Defaults to True for development.
+# Defaults to development mode; set DJANGO_DEBUG=False in production.
 DEBUG = os.environ.get('DJANGO_DEBUG', os.environ.get('DEBUG', 'True')).lower() in ('1', 'true', 'yes')
 
-# Configure allowed hosts via environment variable `ALLOWED_HOSTS`, comma-separated. Defaults to empty list.
-ALLOWED_HOSTS = [h for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h]
+# Production must provide a private DJANGO_SECRET_KEY through its environment.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = secrets.token_urlsafe(50)
+    else:
+        raise ImproperlyConfigured('Set DJANGO_SECRET_KEY when DJANGO_DEBUG=False.')
+
+default_allowed_hosts = 'localhost,127.0.0.1' if DEBUG else ''
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get('ALLOWED_HOSTS', default_allowed_hosts).split(',')
+    if host.strip()
+]
 
 
 LOGGING = {
@@ -93,7 +104,10 @@ MIDDLEWARE = [
 ]
 
 # CORS configuration: in production set CORS_ALLOW_ALL_ORIGINS=false and provide CORS_ALLOWED_ORIGINS
-CORS_ALLOW_ALL_ORIGINS = os.environ.get('CORS_ALLOW_ALL_ORIGINS', 'True').lower() in ('1', 'true', 'yes')
+CORS_ALLOW_ALL_ORIGINS = os.environ.get(
+    'CORS_ALLOW_ALL_ORIGINS',
+    'True' if DEBUG else 'False',
+).lower() in ('1', 'true', 'yes')
 CORS_ALLOWED_ORIGINS = [o for o in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',') if o]
 
 CORS_ALLOW_CREDENTIALS = True
