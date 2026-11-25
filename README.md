@@ -87,9 +87,14 @@ DJANGO_DEBUG=False
 ALLOWED_HOSTS=<dominio-del-backend>.onrender.com
 CORS_ALLOW_ALL_ORIGINS=False
 CORS_ALLOWED_ORIGINS=https://<dominio-del-frontend>.onrender.com
+AUTH_COOKIE_SAMESITE=None
 ASSISTANT_API_URL=https://<dominio-del-asistente>.onrender.com
 FRONTEND_BASE_URL=https://<dominio-del-frontend>.onrender.com
 ```
+
+`AUTH_COOKIE_SAMESITE=None` permite que el navegador envíe la cookie de sesión
+entre el frontend y el backend cuando se publican en dominios distintos. En
+producción, `AUTH_COOKIE_SECURE` se activa automáticamente y requiere HTTPS.
 
 Genera `DJANGO_SECRET_KEY` de forma aleatoria y guárdala solo en las variables
 privadas de Render; no la publiques en Git ni en el frontend. `FRONTEND_BASE_URL`

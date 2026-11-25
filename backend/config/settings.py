@@ -153,7 +153,10 @@ FRONTEND_BASE_URL = os.environ.get('FRONTEND_BASE_URL', 'http://localhost:3000')
 AUTH_COOKIE_NAME = os.environ.get('AUTH_COOKIE_NAME', 'auth_token')
 AUTH_COOKIE_SECURE = not DEBUG  # True in production with HTTPS
 AUTH_COOKIE_HTTPONLY = True
-AUTH_COOKIE_SAMESITE = 'Lax'
+AUTH_COOKIE_SAMESITE = os.environ.get(
+    'AUTH_COOKIE_SAMESITE',
+    'Lax' if DEBUG else 'None',
+)
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [

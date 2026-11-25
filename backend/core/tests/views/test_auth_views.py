@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 from unittest.mock import patch
 
+from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APIRequestFactory
 
@@ -25,10 +26,15 @@ class TestAuthViews:
     def test_login_success(self):
         factory = APIRequestFactory()
         request = factory.post("/api/login/", {"email": "a@b.com", "password": "p"}, format="json")
-        with patch("core.views.AuthService.login", return_value=({"token": "x", "usuario": {"email": "a@b.com"}}, None)):
+        with override_settings(AUTH_COOKIE_SAMESITE="None", AUTH_COOKIE_SECURE=True), patch(
+            "core.views.AuthService.login",
+            return_value=({"token": "x", "usuario": {"email": "a@b.com"}}, None),
+        ):
             response = login_view(request)
         assert response.status_code == status.HTTP_200_OK
         assert response.data["token"] == "x"
+        assert response.cookies["auth_token"]["samesite"] == "None"
+        assert response.cookies["auth_token"]["secure"]
 
     def test_login_failure(self):
         factory = APIRequestFactory()
