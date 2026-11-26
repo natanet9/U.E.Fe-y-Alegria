@@ -398,9 +398,7 @@ export default function PadresLoginPage() {
             </div>
           </div>
 
-          <span className="text-[10px] bg-slate-100 text-slate-600 font-semibold px-2.5 py-1 rounded-full border border-slate-200">
-            PWA Móvil
-          </span>
+      
         </div>
 
         {/* Selector de Modo */}
